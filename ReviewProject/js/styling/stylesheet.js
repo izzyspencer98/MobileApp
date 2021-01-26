@@ -3,13 +3,13 @@ import { StyleSheet } from 'react-native'
 const styles = StyleSheet.create({
   startContainer: {
     flex: 1,
-    backgroundColor: '#7B8CDE',
+    backgroundColor: '#222E50',
     alignItems: 'center',
     justifyContent: 'center'
   },
   inputView: {
-    width: '80%',
-    backgroundColor: '#465881',
+    width: '70%',
+    backgroundColor: '#7B8CDE',
     borderRadius: 25,
     height: 50,
     marginBottom: 20,
@@ -18,22 +18,30 @@ const styles = StyleSheet.create({
   },
   inputText: {
     height: 50,
-    color: 'white'
-  },
-  logo: {
-    fontWeight: 'bold',
-    fontSize: 50,
-    color: '#fb5b5a',
-    marginBottom: 40
+    color: '#FFFFFF'
   },
   loginBtn: {
-    width: '80%',
-    backgroundColor: '#fb5b5a',
+    width: '85%',
+    backgroundColor: '#FE5F55',
     borderRadius: 25,
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 40,
+    marginBottom: 10
+  },
+  noAccountText: {
+    marginTop: 20,
+    color: '#FFFFFF'
+  },
+  signUpBtn: {
+    width: '40%',
+    backgroundColor: '#FE5F55',
+    borderRadius: 25,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
     marginBottom: 10
   }
 })

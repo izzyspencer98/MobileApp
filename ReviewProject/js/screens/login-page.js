@@ -20,7 +20,7 @@ class Login extends Component {
           <TextInput
             style={styles.inputText}
             placeholder='Email'
-            placeholderTextColor='#003f5c'
+            placeholderTextColor='#222E50'
             onChangeText={(email) => this.setState({ email })}
             value={this.state.email}
           />
@@ -29,19 +29,23 @@ class Login extends Component {
           <TextInput
             style={styles.inputText}
             placeholder='Password'
-            placeholderTextColor='#003f5c'
+            placeholderTextColor='#222E50'
             secureTextEntry
             onChangeText={(password) => this.setState({ password })}
             value={this.state.password}
           />
         </View>
         <TouchableOpacity style={styles.loginBtn}>
-          <Text style={styles.loginText}>LOGIN</Text>
+          <Text style={styles.loginText}>Login</Text>
         </TouchableOpacity>
-        <Button
+        <Text style={styles.noAccountText}>Don't Have an Account?</Text>
+        <TouchableOpacity
+          style={styles.signUpBtn}
           title='Sign Up'
           onPress={() => navigation.navigate('Sign Up')}
-        />
+        >
+          <Text style={styles.loginText}>Sign Up</Text>
+        </TouchableOpacity>
       </View>
     )
   }
