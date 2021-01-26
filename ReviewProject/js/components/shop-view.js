@@ -1,10 +1,18 @@
 import React, { Component } from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, Button } from 'react-native'
+import styles from '../styling/stylesheet'
 
 class Shop extends Component {
   render () {
+    const navigation = this.props.navigation
     return (
-      <View><Text>Shop View</Text></View>
+      <View style={styles.center}>
+        <Text>Shop View</Text>
+        <Button
+          title='Add Review'
+          onPress={() => navigation.navigate('Add Review')}
+        />
+      </View>
     )
   }
 }

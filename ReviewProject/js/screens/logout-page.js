@@ -4,7 +4,7 @@ import { View, Text } from 'react-native'
 class Logout extends Component {
   render () {
     return (
-      <View><Text>Logout</Text></View>
+      <View><Text>Logout page</Text></View>
     )
   }
 }

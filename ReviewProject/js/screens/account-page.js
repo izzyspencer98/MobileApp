@@ -1,10 +1,18 @@
 import React, { Component } from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, Button } from 'react-native'
+import styles from '../styling/stylesheet'
 
 class Account extends Component {
   render () {
+    const navigation = this.props.navigation
     return (
-      <View><Text>Account</Text></View>
+      <View style={styles.center}>
+        <Text>Account page</Text>
+        <Button
+          title='Change Details'
+          onPress={() => navigation.navigate('Update Account Details')}
+        />
+      </View>
     )
   }
 }
