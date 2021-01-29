@@ -17,13 +17,13 @@ class SignUp extends Component {
   }
 
   registerUser () {
-    let to_send = {
-      user_id: parseInt(this.state.user_id),
-      first_name: this.state.first_name,
-      last_name: this.state.last_name,
-      email: this.state.email,
-      password: this.state.password
-    }
+    // let to_send = {
+    //   user_id: parseInt(this.state.user_id),
+    //   first_name: this.state.first_name,
+    //   last_name: this.state.last_name,
+    //   email: this.state.email,
+    //   password: this.state.password
+    // }
     return fetch('http://10.0.2.2:3333/api/1.0.0/user', {
       method: 'post',
       headers: {
