@@ -7,6 +7,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
+  coffiDaText: {
+    fontFamily: 'sans-serif-medium',
+    fontWeight: 'bold',
+    fontSize: 60,
+    padding: 30,
+    color: '#FFFFFF'
+  },
   inputView: {
     width: '70%',
     backgroundColor: '#7B8CDE',
@@ -43,6 +50,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 10,
     marginBottom: 10
+  },
+  registeredText: {
+    marginTop: 20,
+    color: '#FFFFFF'
   }
 })
 

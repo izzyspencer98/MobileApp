@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, Button, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import { TextInput } from 'react-native-gesture-handler'
 import styles from '../styling/stylesheet'
 
@@ -7,15 +7,21 @@ class Login extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      isLoading: true,
       email: '',
       password: ''
     }
+  }
+
+  getUser () {
+
   }
 
   render () {
     const navigation = this.props.navigation
     return (
       <View style={styles.startContainer}>
+        <Text style={styles.coffiDaText}>CoffiDa</Text>
         <View style={styles.inputView}>
           <TextInput
             style={styles.inputText}

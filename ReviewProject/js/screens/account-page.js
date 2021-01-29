@@ -5,6 +5,7 @@ import styles from '../styling/stylesheet'
 class Account extends Component {
   render () {
     const navigation = this.props.navigation
+    console.log(navigation)
     return (
       <View style={styles.center}>
         <Text>Account page</Text>
