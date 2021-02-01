@@ -10,9 +10,10 @@ const Stack = createStackNavigator()
 
 class HomeNav extends Component {
   render () {
+    const items = [{ key: 'sina', key2: 'izzy' }]
     return (
       <Stack.Navigator>
-        <Stack.Screen name='Home' component={Home} />
+        <Stack.Screen config={items} name='Home' component={Home} />
         <Stack.Screen name='Search' component={Search} />
         <Stack.Screen name='Shop' component={Shop} />
         <Stack.Screen name='Add Review' component={Review} />
