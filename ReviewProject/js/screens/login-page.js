@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, Alert } from 'react-native'
 import { TextInput } from 'react-native-gesture-handler'
 import styles from '../styling/stylesheet'
 
@@ -13,8 +13,24 @@ class Login extends Component {
     }
   }
 
-  getUser () {
-
+  loginUser () {
+    let to_send = {
+      email: this.state.email,
+      password: this.state.password
+    }
+    return fetch('http://10.0.2.2:3333/api/1.0.0/user/login', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(to_send)
+    })
+      .then((response) => {
+        Alert.alert('User logged in')
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   render () {
@@ -41,7 +57,10 @@ class Login extends Component {
             value={this.state.password}
           />
         </View>
-        <TouchableOpacity style={styles.loginBtn}>
+        <TouchableOpacity
+          style={styles.loginBtn}
+          onPress={() => this.loginUser()}
+        >
           <Text style={styles.loginText}>Login</Text>
         </TouchableOpacity>
         <Text style={styles.noAccountText}>Don't Have an Account?</Text>

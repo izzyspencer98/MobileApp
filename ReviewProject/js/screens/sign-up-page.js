@@ -7,8 +7,6 @@ class SignUp extends Component {
     super(props)
     this.state = {
       isLoading: true,
-      userList: [],
-      user_id: '',
       first_name: '',
       last_name: '',
       email: '',
@@ -17,13 +15,12 @@ class SignUp extends Component {
   }
 
   registerUser () {
-    // let to_send = {
-    //   user_id: parseInt(this.state.user_id),
-    //   first_name: this.state.first_name,
-    //   last_name: this.state.last_name,
-    //   email: this.state.email,
-    //   password: this.state.password
-    // }
+    let to_send = {
+      first_name: this.state.first_name,
+      last_name: this.state.last_name,
+      email: this.state.email,
+      password: this.state.password
+    }
     return fetch('http://10.0.2.2:3333/api/1.0.0/user', {
       method: 'post',
       headers: {
@@ -32,9 +29,11 @@ class SignUp extends Component {
       body: JSON.stringify(to_send)
     })
       .then((response) => {
-        Alert.alert('User ' + this.state.first_name + ' created')
+        Alert.alert('User created')
       })
-      .catch((console.error()))
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   render () {
