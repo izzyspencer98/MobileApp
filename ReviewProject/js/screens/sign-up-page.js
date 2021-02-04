@@ -15,6 +15,7 @@ class SignUp extends Component {
   }
 
   registerUser () {
+    const navigation = this.props.navigation
     let to_send = {
       first_name: this.state.first_name,
       last_name: this.state.last_name,
@@ -29,7 +30,14 @@ class SignUp extends Component {
       body: JSON.stringify(to_send)
     })
       .then((response) => {
-        Alert.alert('User created')
+        if (response.status === 201) {
+          Alert.alert('Account created successfully')
+          navigation.navigate('Login')
+        } else if (response.status === 400) {
+          Alert.alert('Sign up failed. Please ensure all fields are completed and you have entered an unregistered email.')
+        } else {
+          Alert.alert('Something went wrong. Please try again.')
+        }
       })
       .catch((error) => {
         console.log(error)

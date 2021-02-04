@@ -54,6 +54,42 @@ const styles = StyleSheet.create({
   registeredText: {
     marginTop: 20,
     color: '#FFFFFF'
+  },
+  logoutText: {
+    marginTop: 10,
+    color: '#FFFFFF',
+    fontSize: 30
+  },
+  logoutBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15
+  },
+  homeContainer: {
+    flex: 1,
+    backgroundColor: '#222E50'
+  },
+  homeText: {
+    color: '#FFFFFF'
+  },
+  homeFlex: {
+    flex: 1,
+    backgroundColor: '#222E50',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  searchBtn: {
+    width: '85%',
+    backgroundColor: '#FE5F55',
+    borderRadius: 25,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 40,
+    marginBottom: 10
+  },
+  shopCardStyle: {
+    padding: 10,
+    marginVertical: 7
   }
 })
 

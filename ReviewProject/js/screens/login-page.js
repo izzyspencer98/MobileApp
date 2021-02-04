@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
-import { View, Text, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, Alert, ToastAndroid } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { TextInput } from 'react-native-gesture-handler'
+import { Container } from 'native-base'
 import styles from '../styling/stylesheet'
 
 class Login extends Component {
@@ -13,8 +15,9 @@ class Login extends Component {
     }
   }
 
-  loginUser () {
-    let to_send = {
+  async loginUser () {
+    const navigation = this.props.navigation
+    const toSend = {
       email: this.state.email,
       password: this.state.password
     }
@@ -23,10 +26,23 @@ class Login extends Component {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(to_send)
+      body: JSON.stringify(toSend)
     })
       .then((response) => {
-        Alert.alert('User logged in')
+        if (response.status === 200) {
+          ToastAndroid.show('Successfully logged in.', ToastAndroid.SHORT)
+          navigation.navigate('Home')
+          return response.json()
+        } else if (response.status === 400) {
+          Alert.alert('Incorrect login details. Please try again or sign up for a new account.')
+        } else {
+          Alert.alert('Something went wrong. Please try again.')
+        }
+      })
+      .then(async (Json) => {
+        console.log(Json)
+        await AsyncStorage.setItem('@token', String(Json.token))
+        await AsyncStorage.setItem('@id', String(Json.id))
       })
       .catch((error) => {
         console.log(error)
@@ -36,7 +52,7 @@ class Login extends Component {
   render () {
     const navigation = this.props.navigation
     return (
-      <View style={styles.startContainer}>
+      <Container style={styles.startContainer}>
         <Text style={styles.coffiDaText}>CoffiDa</Text>
         <View style={styles.inputView}>
           <TextInput
@@ -71,7 +87,7 @@ class Login extends Component {
         >
           <Text style={styles.loginText}>Sign Up</Text>
         </TouchableOpacity>
-      </View>
+      </Container>
     )
   }
 }
