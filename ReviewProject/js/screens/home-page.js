@@ -2,6 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { Component } from 'react'
 import { Container, Content } from 'native-base'
+import { Image } from 'react-native'
 import styles from '../styling/stylesheet'
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler'
 import ShopCard from '../components/shop-card'
@@ -76,6 +77,7 @@ class Home extends Component {
     return (
       <Container style={styles.homeContainer}>
         <ScrollView>
+          <Image style={{ height: 360, width: null }} source={require('../../assets/images/scene.jpg')} />
           <Content style={styles.shopCardStyle}>
             <TouchableOpacity onPress={() => navigation.navigate('Shop')}>
               <ShopCard shopCardInfo={shopCardInfo} />
