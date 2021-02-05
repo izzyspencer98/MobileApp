@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   },
   homeContainer: {
     flex: 1,
-    backgroundColor: '#430C05'
+    backgroundColor: '#fdecdc'
   },
   homeText: {
     color: '#FFFFFF'

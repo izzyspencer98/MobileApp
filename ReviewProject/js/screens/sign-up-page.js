@@ -32,11 +32,14 @@ class SignUp extends Component {
       .then((response) => {
         if (response.status === 201) {
           Alert.alert('Account created successfully')
+          console.log('sign up successful')
           navigation.navigate('Login')
         } else if (response.status === 400) {
           Alert.alert('Sign up failed. Please ensure all fields are completed and you have entered an unregistered email.')
+          console.log('sign up failed - duplicate email')
         } else {
           Alert.alert('Something went wrong. Please try again.')
+          console.log('sign up failed - server error')
         }
       })
       .catch((error) => {

@@ -31,12 +31,15 @@ class Login extends Component {
       .then((response) => {
         if (response.status === 200) {
           ToastAndroid.show('Successfully logged in.', ToastAndroid.SHORT)
+          console.log('login successful')
           navigation.navigate('Home')
           return response.json()
         } else if (response.status === 400) {
           Alert.alert('Incorrect login details. Please try again or sign up for a new account.')
+          console.log('login failed - incorrect details')
         } else {
           Alert.alert('Something went wrong. Please try again.')
+          console.log('login failed - server error')
         }
       })
       .then(async (Json) => {
