@@ -1,11 +1,12 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { Component } from 'react'
-import { Button, Container, Content } from 'native-base'
-import { Image, SafeAreaView, Text } from 'react-native'
+import { Button, Container, Content, Icon } from 'native-base'
+import { Image, View, Text, Property, Alert, SafeAreaView } from 'react-native'
 import styles from '../styling/stylesheet'
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler'
 import ShopCard from '../components/shop-card'
+import { FloatingAction } from 'react-native-floating-action'
 
 class Home extends Component {
   constructor (props) {
@@ -24,6 +25,10 @@ class Home extends Component {
       navigation.navigate('Login')
     } else {
       console.log('SOMETHING')
+      this.getShopData()
+    }
+
+    if (this.shopCardInfo === null || this.shopCardInfo === undefined || this.shopCardInfo === '') {
       this.getShopData()
     }
   }
@@ -74,26 +79,49 @@ class Home extends Component {
   render () {
     const navigation = this.props.navigation
     const shopCardInfo = this.state.shopCardInfo
+
     return (
       <Container style={styles.homeContainer}>
         <ScrollView>
           <Image style={{ height: 360, width: null }} source={require('../../assets/images/scene.jpg')} />
-          <SafeAreaView>
-            {/* work here */}
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.searchBtn}
-              onPress={() => navigation.navigate('Search')}
-            >
-              <Text style={styles.loginText}>Search</Text>
-            </TouchableOpacity>
-          </SafeAreaView>
           <Content style={styles.shopCardStyle}>
             <TouchableOpacity onPress={() => navigation.navigate('Shop')}>
               <ShopCard shopCardInfo={shopCardInfo} />
             </TouchableOpacity>
           </Content>
         </ScrollView>
+        <FloatingAction
+          actions={[{
+            text: 'Find Coffee Shops',
+            icon: require('../../assets/images/search.png'),
+            name: 'searchbtn',
+            position: 1,
+            color: '#7B8CDE'
+          },
+          {
+            text: 'Sort By',
+            icon: require('../../assets/images/sort.png'),
+            name: 'sortbtn',
+            position: 2,
+            color: '#7B8CDE'
+          }
+          ]}
+          floatingIcon={require('../../assets/images/coffee-cup.png')}
+          iconWidth={45}
+          iconHeight={45}
+          buttonSize={70}
+          position='right'
+          color='#F0B67F'
+          onPressItem={name => {
+            if (name === 'searchbtn') {
+              navigation.navigate('Search')
+            } else if (name === 'sortbtn') {
+              // sort by highest rating or closest distance
+            } else {
+              console.log('error with search')
+            }
+          }}
+        />
       </Container>
     )
   }

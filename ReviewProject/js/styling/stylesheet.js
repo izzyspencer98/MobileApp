@@ -78,13 +78,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   searchBtn: {
-    width: '85%',
-    backgroundColor: '#F0B67F',
+    width: '75%',
     borderRadius: 25,
+    borderStyle: 'solid',
+    borderWidth: 3,
+    borderColor: '#F0B67F',
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 25,
+    marginTop: 5,
     marginBottom: 10
   },
   shopCardStyle: {
