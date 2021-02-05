@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native'
 const styles = StyleSheet.create({
   startContainer: {
     flex: 1,
-    backgroundColor: '#222E50',
+    backgroundColor: '#001D4A',
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -66,30 +66,30 @@ const styles = StyleSheet.create({
   },
   homeContainer: {
     flex: 1,
-    backgroundColor: '#222E50'
+    backgroundColor: '#430C05'
   },
   homeText: {
     color: '#FFFFFF'
   },
   homeFlex: {
     flex: 1,
-    backgroundColor: '#222E50',
+    backgroundColor: '#430C05',
     alignItems: 'center',
     justifyContent: 'center'
   },
   searchBtn: {
     width: '85%',
-    backgroundColor: '#FE5F55',
+    backgroundColor: '#F0B67F',
     borderRadius: 25,
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 40,
+    marginTop: 25,
     marginBottom: 10
   },
   shopCardStyle: {
     padding: 10,
-    marginVertical: 7
+    marginVertical: 1
   }
 })
 

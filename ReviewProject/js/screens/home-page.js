@@ -1,8 +1,8 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { Component } from 'react'
-import { Container, Content } from 'native-base'
-import { Image } from 'react-native'
+import { Button, Container, Content } from 'native-base'
+import { Image, SafeAreaView, Text } from 'react-native'
 import styles from '../styling/stylesheet'
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler'
 import ShopCard from '../components/shop-card'
@@ -78,6 +78,16 @@ class Home extends Component {
       <Container style={styles.homeContainer}>
         <ScrollView>
           <Image style={{ height: 360, width: null }} source={require('../../assets/images/scene.jpg')} />
+          <SafeAreaView>
+            {/* work here */}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.searchBtn}
+              onPress={() => navigation.navigate('Search')}
+            >
+              <Text style={styles.loginText}>Search</Text>
+            </TouchableOpacity>
+          </SafeAreaView>
           <Content style={styles.shopCardStyle}>
             <TouchableOpacity onPress={() => navigation.navigate('Shop')}>
               <ShopCard shopCardInfo={shopCardInfo} />
