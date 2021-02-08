@@ -8,20 +8,17 @@ import styles from '../styling/stylesheet'
 class Logout extends Component {
   constructor (props) {
     super(props)
-    this.state = {
-      xToken: ''
-    }
   }
 
   async logoutUser () {
     const navigation = this.props.navigation
-    this.state.xToken = await AsyncStorage.getItem('@session_token')
+    const token = await AsyncStorage.getItem('@token')
 
     return fetch('http://10.0.2.2:3333/api/1.0.0/user/logout', {
       method: 'post',
       headers: {
         'Content-Type': 'application/json',
-        'X-Authorization': this.state.xToken
+        'X-Authorization': token
       }
     })
       .then((response) => {

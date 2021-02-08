@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native'
 import styles from '../styling/stylesheet'
 
 class SignUp extends Component {
@@ -51,7 +51,7 @@ class SignUp extends Component {
     const navigation = this.props.navigation
     return (
       <View style={styles.startContainer}>
-        <Text style={styles.coffiDaText}>CoffiDa</Text>
+        <Image style={styles.coffiDaLogo} source={require('../../assets/images/coffida-white.png')} />
         <View style={styles.inputView}>
           <TextInput
             style={styles.inputText}

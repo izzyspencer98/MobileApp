@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, TouchableOpacity, Alert, ToastAndroid } from 'react-native'
+import { View, Text, TouchableOpacity, Alert, ToastAndroid, Image } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { TextInput } from 'react-native-gesture-handler'
 import { Container } from 'native-base'
@@ -56,7 +56,7 @@ class Login extends Component {
     const navigation = this.props.navigation
     return (
       <Container style={styles.startContainer}>
-        <Text style={styles.coffiDaText}>CoffiDa</Text>
+        <Image style={styles.coffiDaLogo} source={require('../../assets/images/coffida-white.png')} />
         <View style={styles.inputView}>
           <TextInput
             style={styles.inputText}
