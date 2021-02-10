@@ -32,7 +32,6 @@ class Login extends Component {
         if (response.status === 200) {
           ToastAndroid.show('Successfully logged in.', ToastAndroid.SHORT)
           console.log('login successful')
-          navigation.navigate('Home')
           return response.json()
         } else if (response.status === 400) {
           Alert.alert('Incorrect login details. Please try again or sign up for a new account.')
@@ -46,6 +45,7 @@ class Login extends Component {
         console.log(Json)
         await AsyncStorage.setItem('@token', String(Json.token))
         await AsyncStorage.setItem('@id', String(Json.id))
+        navigation.navigate('Home')
       })
       .catch((error) => {
         console.log(error)

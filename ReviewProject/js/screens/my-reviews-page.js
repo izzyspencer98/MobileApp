@@ -1,18 +1,136 @@
 import React, { Component } from 'react'
-import { View, Text, Button } from 'react-native'
+import { View, TouchableOpacity, Image, Alert, ScrollView, StyleSheet, Dimensions } from 'react-native'
+import { Container, Header, Content, CardItem, Text, Body } from 'native-base'
+import { TextInput } from 'react-native-gesture-handler'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import styles from '../styling/stylesheet'
+import { Block, Button, Card, NavBar, Icon } from 'galio-framework'
+import { AirbnbRating } from 'react-native-ratings'
 
 class MyReviews extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      userReviewData: []
+    }
+  }
+
+  async componentDidMount () {
+    const navigation = this.props.navigation
+    const token = await AsyncStorage.getItem('@token')
+    this.unmount = navigation.addListener('focus', () => {
+      this.componentDidMount()
+    })
+    if (token === null || token === undefined || token === '') {
+      console.log('no token')
+      navigation.navigate('Login')
+    } else {
+      console.log(token)
+      this.getUserReviews()
+    }
+  }
+
+  componentWillUnmount () {
+    this.unmount()
+  }
+
+  async getUserReviews () {
+    const navigation = this.props.navigation
+    const token = await AsyncStorage.getItem('@token')
+    const id = await AsyncStorage.getItem('@id')
+    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Authorization': token
+      }
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          console.log('user reviews fetch successful')
+          return response.json()
+        } else if (response.status === 401) {
+          Alert.alert('Please login to use this feature')
+          navigation.navigate('Login')
+          console.log('user reviews fetch failed - unauthorized')
+        } else if (response.status === 404) {
+          Alert.alert('Please create an account')
+          navigation.navigate('Sign Up')
+          console.log('user reviews fetch failed - user not found')
+        } else {
+          Alert.alert('Something went wrong. Please try again.')
+          console.log('user reviews fetch failed - server error')
+        }
+      })
+      .then((Json) => {
+        this.setState({ userReviewData: Json })
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
   render () {
     const navigation = this.props.navigation
+    const userReviewData = this.state.userReviewData
+
     return (
-      <View style={styles.center}>
-        <Text>My reviews page</Text>
-        <Button
-          title='Edit'
-          onPress={() => navigation.navigate('Edit Review')}
-        />
-      </View>
+      <Block>
+        <Block middle style={{ paddingTop: 20 }}>
+          <Image
+            style={{ width: 90, height: 90 }}
+            source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612979469/MobileApp/rating-green_szz8sl.png' }}
+          />
+        </Block>
+        {userReviewData && userReviewData.reviews && userReviewData.reviews.map((card, index) => (
+          <Block
+            key={index}
+            row center card shadow space='between' style={{
+              borderColor: 'transparent',
+              marginHorizontal: 16,
+              marginVertical: 16 / 2,
+              padding: 16,
+              marginTop: 20,
+              backgroundColor: '#FFFFFF',
+              shadowOpacity: 0.40,
+              elevation: 10
+            }}
+          >
+            <Image
+              style={{ width: 60, height: 60 }}
+              source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612974806/MobileApp/coffee_midath.png' }}
+            />
+            <Block flex style={{ paddingLeft: 10 }}>
+              <Text style={{ fontSize: 19 }}>{card.location.location_name}</Text>
+              <AirbnbRating
+                count={5}
+                defaultRating={card.review.overall_rating}
+                size={20}
+                selectedColor='#06D6A0'
+                isDisabled
+                showRating={false}
+                starContainerStyle={{
+                  alignItems: 'flex-start',
+                  alignSelf: 'flex-start'
+                }}
+              />
+              <Text style={{ fontSize: 15, color: '#697177' }}>{card.location.location_town}</Text>
+              <Text style={{ fontSize: 14, color: '#9FA5AA' }}>{card.review.review_body}</Text>
+            </Block>
+            <Button
+              onPress={() => navigation.navigate('Edit Review')} style={{
+                width: 16 * 2,
+                backgroundColor: 'transparent',
+                elevation: 0
+              }}
+            >
+              <Block flex>
+                <Text style={{ fontSize: 13, color: '#7B8CDE' }}>Edit</Text>
+                <Icon size={20} name='form' family='AntDesign' color='#7B8CDE' />
+              </Block>
+            </Button>
+          </Block>
+        ))}
+      </Block>
     )
   }
 }

@@ -1,22 +1,30 @@
 import React, { Component } from 'react'
-import { View, Text, Button, Alert, TouchableOpacity, Image } from 'react-native'
-import { TextInput } from 'react-native-gesture-handler'
+import { View, Text, Alert, TouchableOpacity, Image, ActivityIndicator } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import styles from '../styling/stylesheet'
-import { Container, Icon } from 'native-base'
+import { Container } from 'native-base'
+import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
+import { ScrollView } from 'react-native-gesture-handler'
 
 class Account extends Component {
   constructor (props) {
     super(props)
     this.state = {
       isLoading: true,
-      userDetails: []
+      userDetails: [],
+      newFirstName: '',
+      newLastName: '',
+      newEmail: '',
+      newPassword: ''
     }
   }
 
   async componentDidMount () {
     const navigation = this.props.navigation
     const token = await AsyncStorage.getItem('@token')
+    this.unmount = navigation.addListener('focus', () => {
+      this.componentDidMount()
+    })
     if (token === null || token === undefined || token === '') {
       console.log('no token')
       navigation.navigate('Login')
@@ -25,6 +33,10 @@ class Account extends Component {
       this.setState({ isLoading: false })
       this.getUserDetails()
     }
+  }
+
+  componentWillUnmount () {
+    this.unmount()
   }
 
   async getUserDetails () {
@@ -55,10 +67,75 @@ class Account extends Component {
         }
       })
       .then((Json) => {
-        console.log(Json)
         this.setState({ userDetails: Json })
         this.setState({ isLoading: false })
-        this.forceUpdate()
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
+  async updateAccount () {
+    // this not running
+    console.log('UPDATING ACCOUNT')
+
+    const toSend = {}
+    const { userDetails, newFirstName, newLastName, newEmail, newPassword } = this.state
+
+    if (newFirstName !== userDetails.first_name && newFirstName !== '') {
+      toSend.first_name = newFirstName
+    }
+    if (newLastName !== userDetails.last_name && newLastName !== '') {
+      toSend.last_name = newLastName
+    }
+    if (newEmail !== userDetails.email && newEmail !== '') {
+      toSend.email = newEmail
+    }
+    if (newPassword !== '') {
+      toSend.password = newPassword
+    }
+
+    console.log(toSend)
+
+    // validation here
+
+    // request here
+
+    const navigation = this.props.navigation
+    const token = await AsyncStorage.getItem('@token')
+    const id = await AsyncStorage.getItem('@id')
+    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
+      method: 'patch',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Authorization': token
+      },
+      body: JSON.stringify(toSend)
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          Alert.alert('Account Updated Successfully')
+          console.log('account update successful')
+          this.getUserDetails()
+          return response.json()
+        } else if (response.status === 400) {
+          Alert.alert('Please edit your account details before updating.')
+          console.log('account update failed - bad request')
+        } else if (response.status === 401) {
+          Alert.alert('Please login to use this feature')
+          navigation.navigate('Login')
+          console.log('account update failed - unauthorized')
+        } else if (response.status === 403) {
+          Alert.alert('Something went wrong. Please close the app and try again.')
+          console.log('account update failed - forbidden')
+        } else if (response.status === 404) {
+          Alert.alert('Apologies we cannot find your details. Please log out and log back in.')
+          navigation.navigate('Logout')
+          console.log('account update failed - not found')
+        } else {
+          Alert.alert('Something went wrong. Please try again.')
+          console.log('account update failed - server error')
+        }
       })
       .catch((error) => {
         console.log(error)
@@ -66,45 +143,136 @@ class Account extends Component {
   }
 
   render () {
-    const navigation = this.props.navigation
-    const isLoading = this.state.isLoading
-    const userDetails = this.state.userDetails
+    const { isLoading, userDetails } = this.state
+    console.log('ACCOUNT - ' + userDetails)
+
+    if (isLoading) {
+      return (
+        <Block
+          middle
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <ActivityIndicator size='large' color='#7B8CDE' />
+        </Block>
+      )
+    }
 
     return (
-      <Container>
-        {isLoading
-          ? <View><Text>LOADING</Text></View>
-          : <Container style={styles.accountContainer}>
-            <View style={styles.accountHeader}>
-              <Image style={styles.accountIcon} source={require('../../assets/images/profile.png')} />
-            </View>
-            <View style={styles.inputView}>
-              <TextInput
-                style={styles.inputText}
-                placeholder='Email'
-                placeholderTextColor='#222E50'
-                onChangeText={(email) => this.setState({ email })}
-                value={this.state.email}
-              />
-            </View>
-            <View style={styles.inputView}>
-              <TextInput
-                style={styles.inputText}
-                placeholder='Password'
-                placeholderTextColor='#222E50'
-                secureTextEntry
-                onChangeText={(password) => this.setState({ password })}
-                value={this.state.password}
-              />
-            </View>
-            <TouchableOpacity
-              style={styles.loginBtn}
-              onPress={() => navigation.navigate('Update Account Details')}
+      <ScrollView>
+        <Block>
+          <Block middle style={{ paddingTop: 40 }}>
+            <Image
+              style={{ width: 80, height: 80 }}
+              source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612982465/MobileApp/profile-purple_sapa50.png' }}
+            />
+            <Text style={{
+              fontSize: 30,
+              marginBottom: 10,
+              color: '#001D4A'
+            }}
+            >Account Details
+            </Text>
+            <Text style={{
+              fontSize: 14,
+              marginBottom: 20,
+              marginHorizontal: 20,
+              textAlign: 'center',
+              color: '#697177'
+            }}
+            >Edit your details below and then click the button to update your account.
+            </Text>
+          </Block>
+          {/* {userDetails && userDetails.map((data, index) => (
+
+        ))} */}
+          <Block
+            middle
+            style={{
+              marginHorizontal: 60,
+              padding: 10
+            }}
+          >
+            <Input
+              rounded
+              placeholder={userDetails.first_name}
+              style={{
+                borderColor: '#7B8CDE',
+                borderWidth: 2,
+                backgroundColor: '#F2F2F2'
+              }}
+              placeholderTextColor='#001D4A'
+              onChangeText={(newFirstName) => this.setState({ newFirstName })}
+              value={this.state.newFirstName}
+            />
+            <Input
+              rounded
+              placeholder={userDetails.last_name}
+              style={{
+                borderColor: '#7B8CDE',
+                borderWidth: 2,
+                backgroundColor: '#F2F2F2'
+              }}
+              placeholderTextColor='#001D4A'
+              onChangeText={(newLastName) => this.setState({ newLastName })}
+              value={this.state.newLastName}
+            />
+            <Input
+              type='email-address'
+              rounded
+              placeholder={userDetails.email}
+              style={{
+                borderColor: '#7B8CDE',
+                borderWidth: 2,
+                backgroundColor: '#F2F2F2'
+              }}
+              placeholderTextColor='#001D4A'
+              onChangeText={(newEmail) => this.setState({ newEmail })}
+              value={this.state.newEmail}
+            />
+            <Input
+              password
+              rounded
+              placeholder='********'
+              style={{
+                borderColor: '#7B8CDE',
+                borderWidth: 2,
+                backgroundColor: '#F2F2F2'
+              }}
+              icon='eye'
+              family='antdesign'
+              iconColor='#001D4A'
+              right
+              help='Minimum 6 characters'
+              bottomHelp
+              placeholderTextColor='#001D4A'
+              onChangeText={(newPassword) => this.setState({ newPassword })}
+              value={this.state.newPassword}
+            />
+          </Block>
+          <Block
+            middle
+            style={{
+              paddingTop: 10
+            }}
+          >
+            <Button
+              round
+              size='large'
+              color='#FE5F55'
+              style={{
+                elevation: 5
+              }}
+              onPress={() => this.updateAccount()}
             >
-              <Text style={styles.loginText}>Edit Details</Text>
-            </TouchableOpacity>
-          </Container>}
-      </Container>
+              Update Account
+            </Button>
+          </Block>
+        </Block>
+      </ScrollView>
     )
   }
 }
