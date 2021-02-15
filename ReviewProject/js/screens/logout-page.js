@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { TextInput } from 'react-native-gesture-handler'
 import { Container } from 'native-base'
 import styles from '../styling/stylesheet'
+import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
 
 class Logout extends Component {
   constructor (props) {
@@ -28,7 +29,7 @@ class Logout extends Component {
           navigation.navigate('Login')
         } else if (response.status === 401) {
           AsyncStorage.clear()
-          Alert.alert('Unauthorised, you are not logged into an account.')
+          Alert.alert('You are not logged into an account.')
           navigation.navigate('Login')
         } else {
           Alert.alert('Something went wrong. Please try again.')
@@ -42,24 +43,44 @@ class Logout extends Component {
   render () {
     const navigation = this.props.navigation
     return (
-      <Container style={styles.startContainer}>
-        {/* <Text style={styles.coffiDaText}>Logout</Text> */}
-        <Text style={styles.logoutText}>Do you want to logout?</Text>
-        <TouchableOpacity
-          style={styles.signUpBtn}
-          title='Logout'
+      <Block
+        middle
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <Text style={{
+          fontSize: 30,
+          marginBottom: 10,
+          color: '#001D4A'
+        }}
+        >Do you want to logout?
+        </Text>
+        <Button
+          round
+          size='small'
+          color='#FE5F55'
+          style={{
+            elevation: 5
+          }}
           onPress={() => this.logoutUser()}
         >
-          <Text style={styles.logoutBtnText}>Logout</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.signUpBtn}
-          title='Go Home'
+          Logout
+        </Button>
+        <Button
+          round
+          size='small'
+          color='#FE5F55'
+          style={{
+            elevation: 5
+          }}
           onPress={() => navigation.navigate('Home')}
         >
-          <Text style={styles.logoutBtnText}>Go Home</Text>
-        </TouchableOpacity>
-      </Container>
+          Go Home
+        </Button>
+      </Block>
     )
   }
 }

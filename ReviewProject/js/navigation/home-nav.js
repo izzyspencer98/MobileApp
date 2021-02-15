@@ -17,7 +17,7 @@ class HomeNav extends Component {
         <Stack.Screen name='Home' component={Home} />
         <Stack.Screen name='Search' component={Search} />
         <Stack.Screen name='Shop' component={Shop} />
-        <Stack.Screen name='Add Review' component={Review} />
+        <Stack.Screen name='Review' component={Review} />
         <Stack.Screen name='Login' component={Login} />
         <Stack.Screen name='Sign Up' component={SignUp} />
       </Stack.Navigator>

@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import { View, Text, TouchableOpacity, Alert, ToastAndroid, Image } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { TextInput } from 'react-native-gesture-handler'
+import { ScrollView, TextInput } from 'react-native-gesture-handler'
 import { Container } from 'native-base'
 import styles from '../styling/stylesheet'
+import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
 
 class Login extends Component {
   constructor (props) {
@@ -55,42 +56,98 @@ class Login extends Component {
   render () {
     const navigation = this.props.navigation
     return (
-      <Container style={styles.startContainer}>
-        <Image style={styles.coffiDaLogo} source={require('../../assets/images/coffida-white.png')} />
-        <View style={styles.inputView}>
-          <TextInput
-            style={styles.inputText}
-            placeholder='Email'
-            placeholderTextColor='#222E50'
-            onChangeText={(email) => this.setState({ email })}
-            value={this.state.email}
-          />
-        </View>
-        <View style={styles.inputView}>
-          <TextInput
-            style={styles.inputText}
-            placeholder='Password'
-            placeholderTextColor='#222E50'
-            secureTextEntry
-            onChangeText={(password) => this.setState({ password })}
-            value={this.state.password}
-          />
-        </View>
-        <TouchableOpacity
-          style={styles.loginBtn}
-          onPress={() => this.loginUser()}
-        >
-          <Text style={styles.loginText}>Login</Text>
-        </TouchableOpacity>
-        <Text style={styles.noAccountText}>Don't Have an Account?</Text>
-        <TouchableOpacity
-          style={styles.signUpBtn}
-          title='Sign Up'
-          onPress={() => navigation.navigate('Sign Up')}
-        >
-          <Text style={styles.loginText}>Sign Up</Text>
-        </TouchableOpacity>
-      </Container>
+      <ScrollView>
+        <Block>
+          <Block
+            middle
+            style={{
+              marginHorizontal: 60,
+              padding: 10,
+              marginTop: 100
+            }}
+          >
+            <Block
+              middle style={{
+                padding: 10
+              }}
+            >
+              <Image
+                style={{ width: 300, height: 80, marginBottom: 20 }}
+                source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1613039533/MobileApp/coffida-purple_srvd8k.png' }}
+              />
+            </Block>
+            <Input
+              type='email-address'
+              rounded
+              placeholder='Email'
+              style={{
+                borderColor: '#7B8CDE',
+                borderWidth: 2,
+                backgroundColor: '#F2F2F2',
+                elevation: 3
+              }}
+              placeholderTextColor='#001D4A'
+              onChangeText={(email) => this.setState({ email })}
+              value={this.state.email}
+            />
+            <Input
+              password
+              rounded
+              placeholder='Password'
+              style={{
+                borderColor: '#7B8CDE',
+                borderWidth: 2,
+                backgroundColor: '#F2F2F2',
+                elevation: 3
+              }}
+              icon='lock'
+              family='antdesign'
+              iconColor='#697177'
+              right
+              placeholderTextColor='#001D4A'
+              onChangeText={(password) => this.setState({ password })}
+              value={this.state.password}
+            />
+          </Block>
+          <Block
+            middle
+            style={{
+              paddingTop: 10
+            }}
+          >
+            <Button
+              round
+              size='large'
+              color='#FE5F55'
+              style={{
+                elevation: 5
+              }}
+              onPress={() => this.loginUser()}
+            >
+              Login
+            </Button>
+            <Text style={{
+              fontSize: 14,
+              marginTop: 15,
+              textAlign: 'center',
+              color: '#697177'
+            }}
+            >Don't Have an Account?
+            </Text>
+            <Button
+              round
+              size='small'
+              color='#FE5F55'
+              style={{
+                elevation: 5
+              }}
+              onPress={() => navigation.navigate('Sign Up')}
+            >
+              Sign Up
+            </Button>
+          </Block>
+        </Block>
+      </ScrollView>
     )
   }
 }

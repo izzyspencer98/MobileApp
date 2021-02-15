@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, TouchableOpacity, Image, Alert, ScrollView, StyleSheet, Dimensions } from 'react-native'
+import { View, TouchableOpacity, Image, Alert, ScrollView, StyleSheet, Dimensions, ActivityIndicator } from 'react-native'
 import { Container, Header, Content, CardItem, Text, Body } from 'native-base'
 import { TextInput } from 'react-native-gesture-handler'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -11,6 +11,7 @@ class MyReviews extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      isLoading: true,
       userReviewData: []
     }
   }
@@ -26,6 +27,7 @@ class MyReviews extends Component {
       navigation.navigate('Login')
     } else {
       console.log(token)
+      this.setState({ isLoading: true })
       this.getUserReviews()
     }
   }
@@ -63,6 +65,7 @@ class MyReviews extends Component {
       })
       .then((Json) => {
         this.setState({ userReviewData: Json })
+        this.setState({ isLoading: false })
       })
       .catch((error) => {
         console.log(error)
@@ -71,7 +74,22 @@ class MyReviews extends Component {
 
   render () {
     const navigation = this.props.navigation
-    const userReviewData = this.state.userReviewData
+    const { isLoading, userReviewData } = this.state
+
+    if (isLoading) {
+      return (
+        <Block
+          middle
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <ActivityIndicator size='large' color='#7B8CDE' />
+        </Block>
+      )
+    }
 
     return (
       <Block>

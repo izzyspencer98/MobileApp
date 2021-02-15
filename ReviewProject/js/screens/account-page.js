@@ -30,7 +30,7 @@ class Account extends Component {
       navigation.navigate('Login')
     } else {
       console.log(token)
-      this.setState({ isLoading: false })
+      this.setState({ isLoading: true })
       this.getUserDetails()
     }
   }
@@ -202,7 +202,8 @@ class Account extends Component {
               style={{
                 borderColor: '#7B8CDE',
                 borderWidth: 2,
-                backgroundColor: '#F2F2F2'
+                backgroundColor: '#F2F2F2',
+                elevation: 3
               }}
               placeholderTextColor='#001D4A'
               onChangeText={(newFirstName) => this.setState({ newFirstName })}
@@ -214,7 +215,8 @@ class Account extends Component {
               style={{
                 borderColor: '#7B8CDE',
                 borderWidth: 2,
-                backgroundColor: '#F2F2F2'
+                backgroundColor: '#F2F2F2',
+                elevation: 3
               }}
               placeholderTextColor='#001D4A'
               onChangeText={(newLastName) => this.setState({ newLastName })}
@@ -227,7 +229,8 @@ class Account extends Component {
               style={{
                 borderColor: '#7B8CDE',
                 borderWidth: 2,
-                backgroundColor: '#F2F2F2'
+                backgroundColor: '#F2F2F2',
+                elevation: 3
               }}
               placeholderTextColor='#001D4A'
               onChangeText={(newEmail) => this.setState({ newEmail })}
@@ -240,9 +243,10 @@ class Account extends Component {
               style={{
                 borderColor: '#7B8CDE',
                 borderWidth: 2,
-                backgroundColor: '#F2F2F2'
+                backgroundColor: '#F2F2F2',
+                elevation: 3
               }}
-              icon='eye'
+              icon='lock'
               family='antdesign'
               iconColor='#001D4A'
               right
