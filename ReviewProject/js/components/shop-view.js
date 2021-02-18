@@ -333,7 +333,7 @@ class Shop extends Component {
                     elevation: 5,
                     marginTop: 10
                   }}
-                  onPress={() => navigation.navigate('Review', { reviewID: null, location: shopInfo.location_name, town: shopInfo.location_town })}
+                  onPress={() => navigation.navigate('Review', { reviewID: null, overall: null, price: null, quality: null, cleanliness: null, body: null, locID: shopInfo.location_id, location: shopInfo.location_name, town: shopInfo.location_town })}
                 >
                   Write Review
                 </Button>
@@ -372,7 +372,7 @@ class Shop extends Component {
                     <Text style={{ fontSize: 14, color: '#9FA5AA' }}>({card.likes} Likes)</Text>
                   </Block>
                   <Block middle>
-                    <TouchableOpacity onPress={() => navigation.navigate('Review', { reviewID: card.review_id, location: shopInfo.location_name, town: shopInfo.location_town })}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Review', { reviewID: card.review_id, overall: card.overall_rating, price: card.price_rating, quality: card.quality_rating, cleanliness: card.clenliness_rating, body: card.review_body, locID: shopInfo.location_id, location: shopInfo.location_name, town: shopInfo.location_town })}>
                       <Icon size={28} name='arrowright' family='AntDesign' color='#FE5F55' />
                     </TouchableOpacity>
                   </Block>
