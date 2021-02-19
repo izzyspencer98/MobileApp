@@ -75,6 +75,7 @@ class MyReviews extends Component {
   render () {
     const navigation = this.props.navigation
     const { isLoading, userReviewData } = this.state
+    const screenHeight = Dimensions.get('screen').height
 
     if (isLoading) {
       return (
@@ -93,61 +94,63 @@ class MyReviews extends Component {
 
     return (
       <Block>
-        <Block middle style={{ paddingTop: 20 }}>
-          <Image
-            style={{ width: 90, height: 90 }}
-            source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612979469/MobileApp/rating-green_szz8sl.png' }}
-          />
-        </Block>
-        {userReviewData && userReviewData.reviews && userReviewData.reviews.map((card, index) => (
-          <Block
-            key={index}
-            row center card shadow space='between' style={{
-              borderColor: 'transparent',
-              marginHorizontal: 16,
-              marginVertical: 16 / 2,
-              padding: 16,
-              marginTop: 20,
-              backgroundColor: '#FFFFFF',
-              shadowOpacity: 0.40,
-              elevation: 10
-            }}
-          >
+        <ScrollView>
+          <Block middle style={{ paddingTop: 20 }}>
             <Image
-              style={{ width: 60, height: 60 }}
-              source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612974806/MobileApp/coffee_midath.png' }}
+              style={{ width: 90, height: 90 }}
+              source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612979469/MobileApp/rating-green_szz8sl.png' }}
             />
-            <Block flex style={{ paddingLeft: 10 }}>
-              <Text style={{ fontSize: 19 }}>{card.location.location_name}</Text>
-              <AirbnbRating
-                count={5}
-                defaultRating={card.review.overall_rating}
-                size={20}
-                selectedColor='#06D6A0'
-                isDisabled
-                showRating={false}
-                starContainerStyle={{
-                  alignItems: 'flex-start',
-                  alignSelf: 'flex-start'
-                }}
-              />
-              <Text style={{ fontSize: 15, color: '#697177' }}>{card.location.location_town}</Text>
-              <Text style={{ fontSize: 14, color: '#9FA5AA' }}>{card.review.review_body}</Text>
-            </Block>
-            <Button
-              onPress={() => navigation.navigate('Edit Review')} style={{
-                width: 16 * 2,
-                backgroundColor: 'transparent',
-                elevation: 0
+          </Block>
+          {userReviewData && userReviewData.reviews && userReviewData.reviews.map((card, index) => (
+            <Block
+              key={index}
+              row center card shadow space='between' style={{
+                borderColor: 'transparent',
+                marginHorizontal: 16,
+                marginVertical: 16 / 2,
+                padding: 16,
+                marginTop: 20,
+                backgroundColor: '#FFFFFF',
+                shadowOpacity: 0.40,
+                elevation: 4
               }}
             >
-              <Block flex>
-                <Text style={{ fontSize: 13, color: '#7B8CDE' }}>Edit</Text>
-                <Icon size={20} name='form' family='AntDesign' color='#7B8CDE' />
+              <Image
+                style={{ width: 60, height: 60 }}
+                source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612974806/MobileApp/coffee_midath.png' }}
+              />
+              <Block flex style={{ paddingLeft: 10 }}>
+                <Text style={{ fontSize: 19 }}>{card.location.location_name}</Text>
+                <AirbnbRating
+                  count={5}
+                  defaultRating={card.review.overall_rating}
+                  size={20}
+                  selectedColor='#06D6A0'
+                  isDisabled
+                  showRating={false}
+                  starContainerStyle={{
+                    alignItems: 'flex-start',
+                    alignSelf: 'flex-start'
+                  }}
+                />
+                <Text style={{ fontSize: 15, color: '#697177' }}>{card.location.location_town}</Text>
+                <Text style={{ fontSize: 14, color: '#9FA5AA' }}>{card.review.review_body}</Text>
               </Block>
-            </Button>
-          </Block>
-        ))}
+              <Button
+                onPress={() => navigation.navigate('Review', { reviewID: card.review.review_id, overall: card.review.overall_rating, price: card.review.price_rating, quality: card.review.quality_rating, cleanliness: card.review.clenliness_rating, body: card.review.review_body, locID: card.location.location_id, location: card.location.location_name, town: card.location.location_town })} style={{
+                  width: 16 * 2,
+                  backgroundColor: 'transparent',
+                  elevation: 0
+                }}
+              >
+                <Block flex>
+                  <Text style={{ fontSize: 13, color: '#7B8CDE' }}>Edit</Text>
+                  <Icon size={20} name='form' family='AntDesign' color='#7B8CDE' />
+                </Block>
+              </Button>
+            </Block>
+          ))}
+        </ScrollView>
       </Block>
     )
   }

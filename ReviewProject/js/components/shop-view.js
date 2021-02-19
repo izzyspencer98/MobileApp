@@ -333,7 +333,7 @@ class Shop extends Component {
                     elevation: 5,
                     marginTop: 10
                   }}
-                  onPress={() => navigation.navigate('Review', { reviewID: null, overall: null, price: null, quality: null, cleanliness: null, body: null, locID: shopInfo.location_id, location: shopInfo.location_name, town: shopInfo.location_town })}
+                  onPress={() => navigation.navigate('ReviewForm', { locID: shopInfo.location_id, location: shopInfo.location_name, town: shopInfo.location_town })}
                 >
                   Write Review
                 </Button>
