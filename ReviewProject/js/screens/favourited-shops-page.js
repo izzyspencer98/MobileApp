@@ -14,6 +14,7 @@ class FavouriteShops extends Component {
     super(props)
     this.state = {
       isLoading: true,
+      noData: true,
       favouriteShops: []
     }
   }
@@ -21,6 +22,7 @@ class FavouriteShops extends Component {
   async componentDidMount () {
     const navigation = this.props.navigation
     const token = await AsyncStorage.getItem('@token')
+    this.setState({ favouriteShops: [] })
     this.unmount = navigation.addListener('focus', () => {
       this.componentDidMount()
     })
@@ -29,8 +31,12 @@ class FavouriteShops extends Component {
       navigation.navigate('Login')
     } else {
       console.log(token)
-      this.setState({ isLoading: true })
-      this.getFavourites()
+      this.setState({
+        isLoading: true,
+        noData: true
+      }, () => {
+        this.getFavourites()
+      })
     }
   }
 
@@ -66,17 +72,31 @@ class FavouriteShops extends Component {
         }
       })
       .then((Json) => {
-        this.setState({ favouriteShops: Json })
-        this.setState({ isLoading: false })
+        this.setState({
+          favouriteShops: Json,
+          isLoading: false
+        }, () => {
+          this.hasData()
+        })
       })
       .catch((error) => {
         console.log(error)
       })
   }
 
+  hasData () {
+    const { favouriteShops } = this.state
+
+    if (favouriteShops.favourite_locations.length) {
+      this.setState({ noData: false })
+    }
+  }
+
   render () {
     const navigation = this.props.navigation
-    const { isLoading, favouriteShops } = this.state
+    const { isLoading, noData, favouriteShops } = this.state
+
+    console.log('DATA - ' + noData)
 
     const imagePaths = [
       {
@@ -116,10 +136,27 @@ class FavouriteShops extends Component {
           <Block middle style={{ paddingTop: 20 }}>
             <Image
               style={{ width: 90, height: 90 }}
-              source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612979469/MobileApp/rating-green_szz8sl.png' }}
+              source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1613925092/MobileApp/favourite_rukpvg.png' }}
             />
           </Block>
-          {favouriteShops.favourite_locations && favouriteShops.favourite_locations.map((data, index) => (
+          {noData
+            ? <Block middle style={{ paddingTop: 20 }}>
+              <Text style={{ textAlign: 'center', color: '#000000' }}>You have not favourited any Coffee Shops.</Text>
+              <Button
+                round
+                size='small'
+                color='#7B8CDE'
+                style={{
+                  elevation: 4,
+                  marginTop: 20
+                }}
+                onPress={() => navigation.navigate('Home')}
+              >
+                Go Home
+              </Button>
+              </Block>
+            : <Block />}
+          {favouriteShops && favouriteShops.favourite_locations && favouriteShops.favourite_locations.map((data, index) => (
             <Block
               key={index}
               center card shadow space='between' style={{

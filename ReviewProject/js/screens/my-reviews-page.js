@@ -12,6 +12,7 @@ class MyReviews extends Component {
     super(props)
     this.state = {
       isLoading: true,
+      noData: true,
       userReviewData: []
     }
   }
@@ -27,8 +28,12 @@ class MyReviews extends Component {
       navigation.navigate('Login')
     } else {
       console.log(token)
-      this.setState({ isLoading: true })
-      this.getUserReviews()
+      this.setState({
+        isLoading: true,
+        noData: true
+      }, () => {
+        this.getUserReviews()
+      })
     }
   }
 
@@ -64,18 +69,29 @@ class MyReviews extends Component {
         }
       })
       .then((Json) => {
-        this.setState({ userReviewData: Json })
-        this.setState({ isLoading: false })
+        this.setState({
+          userReviewData: Json,
+          isLoading: false
+        }, () => {
+          this.hasData()
+        })
       })
       .catch((error) => {
         console.log(error)
       })
   }
 
+  hasData () {
+    const { userReviewData } = this.state
+
+    if (userReviewData.reviews.length) {
+      this.setState({ noData: false })
+    }
+  }
+
   render () {
     const navigation = this.props.navigation
-    const { isLoading, userReviewData } = this.state
-    const screenHeight = Dimensions.get('screen').height
+    const { isLoading, noData, userReviewData } = this.state
 
     if (isLoading) {
       return (
@@ -98,9 +114,26 @@ class MyReviews extends Component {
           <Block middle style={{ paddingTop: 20 }}>
             <Image
               style={{ width: 90, height: 90 }}
-              source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612979469/MobileApp/rating-green_szz8sl.png' }}
+              source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1613924689/MobileApp/rating_sjkpo9.png' }}
             />
           </Block>
+          {noData
+            ? <Block middle style={{ paddingTop: 20 }}>
+              <Text style={{ textAlign: 'center', color: '#000000' }}>You have not posted any reviews.</Text>
+              <Button
+                round
+                size='small'
+                color='#7B8CDE'
+                style={{
+                  elevation: 4,
+                  marginTop: 20
+                }}
+                onPress={() => navigation.navigate('Home')}
+              >
+                Go Home
+              </Button>
+              </Block>
+            : <Block />}
           {userReviewData && userReviewData.reviews && userReviewData.reviews.map((card, index) => (
             <Block
               key={index}

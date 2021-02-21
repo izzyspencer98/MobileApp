@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { View, Text } from 'native-base'
-import { Alert, ActivityIndicator, ScrollView, Image, ToastAndroid } from 'react-native'
+import { Alert, ActivityIndicator, ScrollView, Image, ToastAndroid, TouchableNativeFeedbackBase } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import styles from '../styling/stylesheet'
 import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
@@ -12,6 +12,7 @@ class Shop extends Component {
     super(props)
     this.state = {
       isLoading: true,
+      locID: '',
       path: '',
       shopInfo: [],
       userDetails: [],
@@ -24,12 +25,17 @@ class Shop extends Component {
     this.setState({ isFavourited: false })
     const { route } = this.props
     const { locID, path } = route.params
-    this.setState({ path: path })
-    this.getShop(locID)
-    this.getUserDetails()
+    this.setState({
+      locID: locID,
+      path: path
+    }, () => {
+      this.getShop()
+    })
   }
 
-  async getShop (locID) {
+  async getShop () {
+    const locID = this.state.locID
+    console.log('LOCATION - ' + locID)
     const token = await AsyncStorage.getItem('@token')
     return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locID, {
       headers: {
@@ -51,6 +57,7 @@ class Shop extends Component {
       .then((Json) => {
         console.log(Json)
         this.setState({ shopInfo: Json })
+        this.getUserDetails()
       })
       .catch((error) => {
         console.log(error)
@@ -85,9 +92,12 @@ class Shop extends Component {
         }
       })
       .then((Json) => {
-        this.setState({ userDetails: Json })
-        this.setState({ isLoading: false })
-        this.checkData()
+        this.setState({
+          userDetails: Json,
+          isLoading: false
+        }, () => {
+          this.checkData()
+        })
       })
       .catch((error) => {
         console.log(error)
@@ -95,9 +105,9 @@ class Shop extends Component {
   }
 
   checkData () {
-    const { userData } = this.state
+    const { userDetails } = this.state
 
-    userData.favourite_locations && userData.favourite_locations.map((data, index) => (
+    userDetails.favourite_locations && userDetails.favourite_locations.map((data, index) => (
       this.getFavourite(data)
     ))
   }
