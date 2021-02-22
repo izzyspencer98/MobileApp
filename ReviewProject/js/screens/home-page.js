@@ -8,13 +8,22 @@ import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler'
 import { FloatingAction } from 'react-native-floating-action'
 import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
+import search from '../api/search'
 
 class Home extends Component {
   constructor (props) {
     super(props)
     this.state = {
       isLoading: true,
-      shopCardInfo: []
+      shopCardInfo: [],
+      shopName: '',
+      overallRating: 0,
+      priceRating: 0,
+      qualityRating: 0,
+      clenlinessRating: 0,
+      favourites: '',
+      myReviews: '',
+      offset: 0
     }
   }
 
@@ -29,14 +38,23 @@ class Home extends Component {
       navigation.navigate('Login')
     } else {
       console.log(token)
-      this.setState({ shopCardInfo: [] })
-      this.setState({ isLoading: true })
-      this.getShopData()
+      this.setState({
+        shopCardInfo: [],
+        isLoading: true
+      }, () => {
+        this.getShopData()
+      })
     }
   }
 
   componentWillUnmount () {
     this.unmount()
+  }
+
+  searchOrHome () {
+    // const { shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset } = this.state
+    // this.setState({ shopCardInfo: search.findLocations(shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset) })
+    // this.setState({ isLoading: false })
   }
 
   async getShopData () {

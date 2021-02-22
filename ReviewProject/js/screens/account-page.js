@@ -186,9 +186,6 @@ class Account extends Component {
             >Edit your details below and then click the button to update your account.
             </Text>
           </Block>
-          {/* {userDetails && userDetails.map((data, index) => (
-
-        ))} */}
           <Block
             middle
             style={{
