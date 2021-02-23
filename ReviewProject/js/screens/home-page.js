@@ -34,10 +34,10 @@ class Home extends Component {
       this.componentDidMount()
     })
     if (token === null || token === undefined || token === '') {
-      console.log('no token')
+      console.log('Need to Login')
       navigation.navigate('Login')
     } else {
-      console.log(token)
+      console.log('User logged in - ' + token)
       this.setState({
         shopCardInfo: [],
         isLoading: true
@@ -51,42 +51,11 @@ class Home extends Component {
     this.unmount()
   }
 
-  searchOrHome () {
-    // const { shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset } = this.state
-    // this.setState({ shopCardInfo: search.findLocations(shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset) })
-    // this.setState({ isLoading: false })
-  }
-
   async getShopData () {
-    const token = await AsyncStorage.getItem('@token')
-    return fetch('http://10.0.2.2:3333/api/1.0.0/find', {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      }
+    const data = await search.getAll()
+    this.setState({ shopCardInfo: data }, () => {
+      this.setState({ isLoading: false })
     })
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('search successful')
-          return response.json()
-        } else if (response.status === 400) {
-          console.log('search failed - bad request')
-        } else if (response.status === 401) {
-          Alert.alert('Please login to use this feature')
-          console.log('search failed - not logged in')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('search failed - server error')
-        }
-      })
-      .then((Json) => {
-        console.log(Json)
-        this.setState({ shopCardInfo: Json })
-        this.setState({ isLoading: false })
-      })
-      .catch((error) => {
-        console.log(error)
-      })
   }
 
   render () {

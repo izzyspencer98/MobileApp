@@ -4,6 +4,8 @@ import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AirbnbRating } from 'react-native-ratings'
 import { TouchableOpacity } from 'react-native-gesture-handler'
+import reviewFetch from '../api/review'
+import userFetch from '../api/user'
 
 class NewReview extends Component {
   constructor (props) {
@@ -12,7 +14,10 @@ class NewReview extends Component {
       locID: '',
       location: '',
       town: '',
+      photo: '',
+      uriPhoto: '',
       isLoading: true,
+      hasPhoto: false,
       overallRating: 0,
       priceRating: 0,
       qualityRating: 0,
@@ -22,62 +27,67 @@ class NewReview extends Component {
   }
 
   async componentDidMount () {
-    this.setState({ isLoading: false })
-    const { route } = this.props
-    const { locID, location, town } = route.params
-    this.setState({ locID: locID })
-    this.setState({ location: location })
-    this.setState({ town: town })
+    const { navigation, route } = this.props
+    const { locID, location, town, photo } = route.params
+    this.unmount = navigation.addListener('focus', () => {
+      this.componentDidMount()
+    })
+    if (photo === '') {
+      console.log('NO PHOTO')
+      this.setState({ isLoading: false })
+      this.setState({ hasPhoto: false })
+      this.setState({ locID: locID })
+      this.setState({ location: location })
+      this.setState({ town: town })
+    }
+    if (photo !== '') {
+      console.log('PHOTO FOUND')
+      this.setState({ isLoading: true, photo: photo }, () => {
+        this.checkForPhoto()
+      })
+    }
+  }
+
+  componentWillUnmount () {
+    this.unmount()
+  }
+
+  checkForPhoto () {
+    console.log('OPEN')
+
+    const photo = this.state.photo
+    if (photo !== '') {
+      const uriPhoto = 'data:image/png;base64,' + photo
+      this.setState({ hasPhoto: true, uriPhoto: uriPhoto }, () => {
+        this.setState({ isLoading: false })
+      })
+    }
   }
 
   async addReview () {
     this.setState({ isLoading: true })
-    const { locID } = this.state
     const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
-    const toSend = {
-      overall_rating: this.state.overallRating,
-      price_rating: this.state.priceRating,
-      quality_rating: this.state.qualityRating,
-      clenliness_rating: this.state.clenlinessRating,
-      review_body: this.state.reviewBody
+    const { locID, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody } = this.state
+    const response = await reviewFetch.addReview(locID, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody)
+    if (response === 201) {
+      this.addPhoto(reviewBody)
+      navigation.navigate('Home')
     }
+    if (response === 401) {
+      navigation.navigate('Login')
+    }
+    if (response === 404) {
+      navigation.navigate('Logout')
+    }
+  }
 
-    return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locID + '/review', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      },
-      body: JSON.stringify(toSend)
-    })
-      .then((response) => {
-        if (response.status === 201) {
-          ToastAndroid.show('Review Posted Successfully', ToastAndroid.SHORT)
-          console.log('new review successful')
-          navigation.navigate('Home')
-        } else if (response.status === 400) {
-          Alert.alert('Review failed. Please ensure all fields are completed before you post.')
-          console.log('new review failed - bad request')
-        } else if (response.status === 401) {
-          Alert.alert('Please login to use this feature')
-          navigation.navigate('Login')
-        } else if (response.status === 404) {
-          Alert.alert('Apologies we cannot post this review. Please log out and log back in.')
-          navigation.navigate('Logout')
-          console.log('new review failed - not found')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('new review failed - server error')
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+  async addPhoto (reviewBody) {
+    const revID = await userFetch.getReviewID(reviewBody)
   }
 
   render () {
-    const { isLoading, location, town } = this.state
+    const { isLoading, hasPhoto, uriPhoto, location, town } = this.state
+    const navigation = this.props.navigation
 
     if (isLoading) {
       return (
@@ -127,19 +137,26 @@ class NewReview extends Component {
                 </Text>
                 <Text style={{ fontSize: 18, color: '#697177', paddingBottom: 5 }}>{town}</Text>
               </Block>
-              <TouchableOpacity>
-                <Block
-                  middle style={{
-                    width: 130,
-                    height: 100,
-                    borderWidth: 1,
-                    borderColor: '#7B8CDE'
-                  }}
-                >
-                  <Text style={{ fontSize: 20, color: '#7B8CDE' }}>+</Text>
-                  <Text style={{ fontSize: 14, color: '#7B8CDE' }}>Add Image</Text>
-                </Block>
-              </TouchableOpacity>
+              {hasPhoto
+                ? <TouchableOpacity onPress={() => navigation.navigate('Camera')}>
+                  <Image
+                    style={{ width: 130, height: 100, borderRadius: 3 }}
+                    source={{ uri: uriPhoto }}
+                  />
+                  </TouchableOpacity>
+                : <TouchableOpacity onPress={() => navigation.navigate('Camera')}>
+                  <Block
+                    middle style={{
+                      width: 130,
+                      height: 100,
+                      borderWidth: 1,
+                      borderColor: '#7B8CDE'
+                    }}
+                  >
+                    <Text style={{ fontSize: 20, color: '#7B8CDE' }}>+</Text>
+                    <Text style={{ fontSize: 14, color: '#7B8CDE' }}>Add Image</Text>
+                  </Block>
+                </TouchableOpacity>}
             </Block>
             <Block
               middle style={{

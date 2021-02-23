@@ -82,7 +82,6 @@ class Search extends Component {
 
     const results = await search.findLocations(shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset)
     this.setState({ searchResults: results })
-    console.log('RESULTS - ' + JSON.stringify(this.state.searchResults))
   }
 
   async handleBack () {

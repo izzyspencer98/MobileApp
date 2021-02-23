@@ -4,7 +4,6 @@ import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AirbnbRating } from 'react-native-ratings'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { CheckBox } from 'native-base'
 
 class Review extends Component {
   constructor (props) {

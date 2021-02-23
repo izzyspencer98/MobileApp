@@ -43,6 +43,11 @@ class SearchQuery extends Component {
     return results
   }
 
+  async getAll () {
+    const results = await this.search('')
+    return results
+  }
+
   buildQuery (toSend) {
     const pairs = []
     for (const param in toSend) {
