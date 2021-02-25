@@ -6,6 +6,9 @@ import styles from '../styling/stylesheet'
 import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
 import { TouchableOpacity } from 'react-native-gesture-handler'
+import locationFetch from '../api/location'
+import favouriteFetch from '../api/favourites'
+import userFetch from '../api/user'
 
 class Shop extends Component {
   constructor (props) {
@@ -21,11 +24,11 @@ class Shop extends Component {
   }
 
   async componentDidMount () {
-    this.setState({ isLoading: true })
-    this.setState({ isFavourited: false })
     const { route } = this.props
     const { locID, path } = route.params
     this.setState({
+      isLoading: true,
+      isFavourited: false,
       locID: locID,
       path: path
     }, () => {
@@ -35,73 +38,19 @@ class Shop extends Component {
 
   async getShop () {
     const locID = this.state.locID
-    console.log('LOCATION - ' + locID)
-    const token = await AsyncStorage.getItem('@token')
-    return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locID, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      }
+    const shopInfo = await locationFetch.getLocationInfo(locID)
+    this.setState({ shopInfo: shopInfo }, () => {
+      this.getUserDetails()
     })
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('shop fetch successful')
-          return response.json()
-        } else if (response.status === 404) {
-          console.log('shop fetch failed - bad request')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('shop fetch failed - server error')
-        }
-      })
-      .then((Json) => {
-        console.log(Json)
-        this.setState({ shopInfo: Json })
-        this.getUserDetails()
-      })
-      .catch((error) => {
-        console.log(error)
-      })
   }
 
   async getUserDetails () {
-    const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
-    const id = await AsyncStorage.getItem('@id')
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      }
+    const userDetails = await userFetch.getUserDetails()
+    this.setState({
+      userDetails: userDetails
+    }, () => {
+      this.checkData()
     })
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('user fetch successful')
-          return response.json()
-        } else if (response.status === 401) {
-          Alert.alert('Please login to use this feature')
-          navigation.navigate('Login')
-          console.log('user fetch failed - unauthorized')
-        } else if (response.status === 404) {
-          Alert.alert('Please create an account')
-          navigation.navigate('Sign Up')
-          console.log('user fetch failed - user not found')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('user fetch failed - server error')
-        }
-      })
-      .then((Json) => {
-        this.setState({
-          userDetails: Json,
-          isLoading: false
-        }, () => {
-          this.checkData()
-        })
-      })
-      .catch((error) => {
-        console.log(error)
-      })
   }
 
   checkData () {
@@ -114,83 +63,45 @@ class Shop extends Component {
 
   getFavourite (data) {
     const { shopInfo } = this.state
+    console.log('USER FAVS - ' + data.location_id)
+    console.log('LOC ID - ' + shopInfo.location_id)
     const id = shopInfo.location_id
     if (data.location_id === id) {
-      this.setState({ isFavourited: true })
+      this.setState({ isFavourited: true }, () => {
+        this.setState({ isLoading: false })
+      })
     }
   }
 
   async handleFavourite () {
     const { shopInfo, isFavourited } = this.state
     const id = shopInfo.location_id
-    const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
+    const location = shopInfo.location_name
     if (isFavourited) {
-      return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + id + '/favourite', {
-        method: 'delete',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': token
-        }
-      })
-        .then((response) => {
-          if (response.status === 200) {
-            ToastAndroid.show(this.state.shopInfo.location_name + ' removed from Favourites', ToastAndroid.SHORT)
-            this.setState({ isFavourited: false })
-            this.getUserDetails()
-            console.log('delete favourite successful')
-          } else if (response.status === 401) {
-            Alert.alert('Please login to use this feature')
-            navigation.navigate('Login')
-            console.log('delete favourite failed - unauthorised')
-          } else if (response.status === 403) {
-            Alert.alert('Something went wrong. Please close the app and try again.')
-            console.log('delete favourite failed - bad request')
-          } else if (response.status === 404) {
-            Alert.alert('Apologies we cannot unfavourite this shop. Please log out and log back in.')
-            navigation.navigate('Logout')
-            console.log('delete favourite failed - not found')
-          } else {
-            Alert.alert('Something went wrong. Please try again.')
-            console.log('delete fetch failed - server error')
-          }
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+      const status = await favouriteFetch.unfavouriteLocation(id, location)
+      const favourite = false
+      this.handleStatus(status, favourite)
     } else {
-      return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + id + '/favourite', {
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': token
-        }
+      const status = await favouriteFetch.favouriteLocation(id, location)
+      const favourite = true
+      this.handleStatus(status, favourite)
+    }
+  }
+
+  handleStatus (status, favourite) {
+    console.log('STATUS = ' + status)
+    console.log('IS FAVOURITED? - ' + favourite)
+    const navigation = this.props.navigation
+    if (status === 200) {
+      this.setState({ isFavourited: favourite }, () => {
+        this.getUserDetails()
       })
-        .then((response) => {
-          if (response.status === 200) {
-            ToastAndroid.show(this.state.shopInfo.location_name + ' added to Favourites', ToastAndroid.SHORT)
-            this.setState({ isFavourited: true })
-            this.getUserDetails()
-            console.log('add favourite successful')
-          } else if (response.status === 400) {
-            Alert.alert('Something went wrong. Please close the app and try again.')
-            console.log('add favourite failed - bad request')
-          } else if (response.status === 401) {
-            Alert.alert('Please login to use this feature')
-            navigation.navigate('Login')
-            console.log('add favourite failed - unauthorised')
-          } else if (response.status === 404) {
-            Alert.alert('Apologies we cannot favourite this shop. Please log out and log back in.')
-            navigation.navigate('Logout')
-            console.log('add favourite failed - not found')
-          } else {
-            Alert.alert('Something went wrong. Please try again.')
-            console.log('shop fetch failed - server error')
-          }
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+    }
+    if (status === 401) {
+      navigation.navigate('Login')
+    }
+    if (status === 404) {
+      navigation.navigate('Logout')
     }
   }
 

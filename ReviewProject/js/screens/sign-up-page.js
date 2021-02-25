@@ -2,50 +2,32 @@ import React, { Component } from 'react'
 import { View, Text, TextInput, TouchableOpacity, Alert, Image, ScrollView } from 'react-native'
 import styles from '../styling/stylesheet'
 import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
+import accountFetch from '../api/account'
 
 class SignUp extends Component {
   constructor (props) {
     super(props)
     this.state = {
       isLoading: true,
-      first_name: '',
-      last_name: '',
+      firstName: '',
+      lastName: '',
       email: '',
       password: ''
     }
   }
 
-  registerUser () {
+  async registerUser () {
     const navigation = this.props.navigation
-    const to_send = {
-      first_name: this.state.first_name,
-      last_name: this.state.last_name,
+    const toSend = {
+      first_name: this.state.firstName,
+      last_name: this.state.lastName,
       email: this.state.email,
       password: this.state.password
     }
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(to_send)
-    })
-      .then((response) => {
-        if (response.status === 201) {
-          Alert.alert('Account created successfully')
-          console.log('sign up successful')
-          navigation.navigate('Login')
-        } else if (response.status === 400) {
-          Alert.alert('Sign up failed. Please ensure all fields are completed and you have entered an unregistered email.')
-          console.log('sign up failed - duplicate email')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('sign up failed - server error')
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+    const status = await accountFetch.signUp(toSend)
+    if (status === 201) {
+      navigation.navigate('Login')
+    }
   }
 
   render () {
@@ -81,8 +63,8 @@ class SignUp extends Component {
                 elevation: 3
               }}
               placeholderTextColor='#001D4A'
-              onChangeText={(first_name) => this.setState({ first_name })}
-              value={this.state.first_name}
+              onChangeText={(firstName) => this.setState({ firstName })}
+              value={this.state.firstName}
             />
             <Input
               rounded
@@ -94,8 +76,8 @@ class SignUp extends Component {
                 elevation: 3
               }}
               placeholderTextColor='#001D4A'
-              onChangeText={(last_name) => this.setState({ last_name })}
-              value={this.state.last_name}
+              onChangeText={(lastName) => this.setState({ lastName })}
+              value={this.state.lastName}
             />
             <Input
               type='email-address'
@@ -171,61 +153,6 @@ class SignUp extends Component {
           </Block>
         </Block>
       </ScrollView>
-
-    // <View style={styles.startContainer}>
-    //   <Image style={styles.coffiDaLogo} source={require('../../assets/images/coffida-white.png')} />
-    //   <View style={styles.inputView}>
-    //     <TextInput
-    //       style={styles.inputText}
-    //       placeholder='First Name'
-    //       placeholderTextColor='#222E50'
-    //       onChangeText={(first_name) => this.setState({ first_name })}
-    //       value={this.state.first_name}
-    //     />
-    //   </View>
-    //   <View style={styles.inputView}>
-    //     <TextInput
-    //       style={styles.inputText}
-    //       placeholder='Last Name'
-    //       placeholderTextColor='#222E50'
-    //       onChangeText={(last_name) => this.setState({ last_name })}
-    //       value={this.state.last_name}
-    //     />
-    //   </View>
-    //   <View style={styles.inputView}>
-    //     <TextInput
-    //       style={styles.inputText}
-    //       placeholder='Email'
-    //       placeholderTextColor='#222E50'
-    //       onChangeText={(email) => this.setState({ email })}
-    //       value={this.state.email}
-    //     />
-    //   </View>
-    //   <View style={styles.inputView}>
-    //     <TextInput
-    //       style={styles.inputText}
-    //       placeholder='Password'
-    //       placeholderTextColor='#222E50'
-    //       secureTextEntry
-    //       onChangeText={(password) => this.setState({ password })}
-    //       value={this.state.password}
-    //     />
-    //   </View>
-    //   <TouchableOpacity
-    //     style={styles.loginBtn}
-    //     onPress={() => this.registerUser()}
-    //   >
-    //     <Text style={styles.loginText}>Sign Up</Text>
-    //   </TouchableOpacity>
-    //   <Text style={styles.registeredText}>Already registered?</Text>
-    //   <TouchableOpacity
-    //     style={styles.signUpBtn}
-    //     title='Login'
-    //     onPress={() => navigation.navigate('Login')}
-    //   >
-    //     <Text style={styles.loginText}>Login</Text>
-    //   </TouchableOpacity>
-    // </View>
     )
   }
 }

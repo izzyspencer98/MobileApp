@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import styles from '../styling/stylesheet'
 import { Block, Button, Card, NavBar, Icon } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
+import userFetch from '../api/user'
 
 class LikedReviews extends Component {
   constructor (props) {
@@ -42,43 +43,10 @@ class LikedReviews extends Component {
   }
 
   async getLikedReviews () {
-    const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
-    const id = await AsyncStorage.getItem('@id')
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      }
+    const likedReviews = await userFetch.getUserDetails()
+    this.setState({ likedReviews: likedReviews, isLoading: false }, () => {
+      this.hasData()
     })
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('user reviews fetch successful')
-          return response.json()
-        } else if (response.status === 401) {
-          Alert.alert('Please login to use this feature')
-          navigation.navigate('Login')
-          console.log('user reviews fetch failed - unauthorized')
-        } else if (response.status === 404) {
-          Alert.alert('Please create an account')
-          navigation.navigate('Sign Up')
-          console.log('user reviews fetch failed - user not found')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('user reviews fetch failed - server error')
-        }
-      })
-      .then((Json) => {
-        this.setState({
-          likedReviews: Json,
-          isLoading: false
-        }, () => {
-          this.hasData()
-        })
-      })
-      .catch((error) => {
-        console.log(error)
-      })
   }
 
   hasData () {

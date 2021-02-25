@@ -1,9 +1,6 @@
-import React, { Component } from 'react'
-import { View, Text, ActivityIndicator, ScrollView, Image, ToastAndroid, Alert } from 'react-native'
-import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
+import { Component } from 'react'
+import { ToastAndroid, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { AirbnbRating } from 'react-native-ratings'
-import { TouchableOpacity } from 'react-native-gesture-handler'
 
 class ReviewFetch extends Component {
   async addReview (locID, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody) {

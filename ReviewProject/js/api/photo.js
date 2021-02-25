@@ -1,7 +1,6 @@
-import React, { Component } from 'react'
-import { View, Text, Alert, TouchableOpacity, Image, ActivityIndicator, ToastAndroid } from 'react-native'
+import { Component } from 'react'
+import { Alert, ToastAndroid } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import styles from '../styling/stylesheet'
 
 class PhotoFetch extends Component {
   async checkForPhoto (locID, reviewID) {

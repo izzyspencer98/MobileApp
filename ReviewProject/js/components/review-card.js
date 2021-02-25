@@ -205,8 +205,9 @@ class Review extends Component {
   handleLikeStatus (status, liked) {
     const navigation = this.props.navigation
     if (status === 200) {
-      this.setState({ isLiked: liked })
-      this.getUserDetails()
+      this.setState({ isLiked: liked }, () => {
+        this.getUserDetails()
+      })
     }
     if (status === 401) {
       navigation.navigate('Login')

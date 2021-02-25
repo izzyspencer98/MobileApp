@@ -5,6 +5,7 @@ import { ScrollView, TextInput } from 'react-native-gesture-handler'
 import { Container } from 'native-base'
 import styles from '../styling/stylesheet'
 import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
+import accountFetch from '../api/account'
 
 class Login extends Component {
   constructor (props) {
@@ -22,35 +23,10 @@ class Login extends Component {
       email: this.state.email,
       password: this.state.password
     }
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/login', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(toSend)
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          ToastAndroid.show('Successfully logged in.', ToastAndroid.SHORT)
-          console.log('login successful')
-          return response.json()
-        } else if (response.status === 400) {
-          Alert.alert('Incorrect login details. Please try again or sign up for a new account.')
-          console.log('login failed - incorrect details')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('login failed - server error')
-        }
-      })
-      .then(async (Json) => {
-        console.log(Json)
-        await AsyncStorage.setItem('@token', String(Json.token))
-        await AsyncStorage.setItem('@id', String(Json.id))
-        navigation.navigate('Home')
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+    const response = await accountFetch.login(toSend)
+    await AsyncStorage.setItem('@token', String(response.token))
+    await AsyncStorage.setItem('@id', String(response.id))
+    navigation.navigate('Home')
   }
 
   render () {

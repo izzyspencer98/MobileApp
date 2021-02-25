@@ -8,6 +8,7 @@ import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler'
 import { FloatingAction } from 'react-native-floating-action'
 import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
+import userFetch from '../api/user'
 
 class FavouriteShops extends Component {
   constructor (props) {
@@ -45,43 +46,10 @@ class FavouriteShops extends Component {
   }
 
   async getFavourites () {
-    const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
-    const id = await AsyncStorage.getItem('@id')
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      }
+    const favouriteShops = await userFetch.getUserDetails()
+    this.setState({ favouriteShops: favouriteShops, isLoading: false }, () => {
+      this.hasData()
     })
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('user favourites fetch successful')
-          return response.json()
-        } else if (response.status === 401) {
-          Alert.alert('Please login to use this feature')
-          navigation.navigate('Login')
-          console.log('user favourites fetch failed - unauthorized')
-        } else if (response.status === 404) {
-          Alert.alert('Please create an account')
-          navigation.navigate('Sign Up')
-          console.log('user favourites fetch failed - user not found')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('user favourites fetch failed - server error')
-        }
-      })
-      .then((Json) => {
-        this.setState({
-          favouriteShops: Json,
-          isLoading: false
-        }, () => {
-          this.hasData()
-        })
-      })
-      .catch((error) => {
-        console.log(error)
-      })
   }
 
   hasData () {
