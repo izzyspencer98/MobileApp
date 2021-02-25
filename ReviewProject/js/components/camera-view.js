@@ -3,46 +3,56 @@ import { RNCamera } from 'react-native-camera'
 import { Block, Button, Card, NavBar, Icon, Input, Text } from 'galio-framework'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import * as ImagePicker from 'react-native-image-picker'
-import photoFetch from '../api/photo'
 
 class Camera extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      photo: ''
+      photo: '',
+      page: ''
     }
   }
 
   componentDidMount () {
     this.setState({ photo: '' })
+    const { route } = this.props
+    const { page } = route.params
+    this.setState({ page: page })
   }
 
   async takePhoto () {
     const navigation = this.props.navigation
+    const page = this.state.page
     if (this.camera) {
       const options = { quality: 0.5, base64: true }
-      const base = await this.camera.takePictureAsync(options)
-      const photo = base.base64
-      navigation.navigate('ReviewForm', { locID: null, location: '', town: '', photo: photo })
-    //   this.setState({ photo: photo }, () => {
-    //     photoFetch.postPhoto(photo)
-    //   })
+      const data = await this.camera.takePictureAsync(options)
+      if (page === 'newForm') {
+        navigation.navigate('ReviewForm', { locID: null, location: '', town: '', photo: data })
+      } else if (page === 'currentReview') {
+        navigation.navigate('Review', { reviewID: null, overall: null, price: null, quality: null, cleanliness: null, body: '', locID: null, location: '', town: '', photo: data })
+      } else {
+        navigation.navigate('Home')
+      }
     }
   }
 
   chooseImage () {
     const navigation = this.props.navigation
+    const page = this.state.page
     const options = {
       title: 'Select Image',
       includeBase64: true,
       mediaType: 'photo'
     }
     ImagePicker.launchImageLibrary(options, response => {
-      const photo = response.base64
-      navigation.navigate('ReviewForm', { locID: null, location: '', town: '', photo: photo })
-    //   this.setState({ photo: photo }, () => {
-    //     photoFetch.postPhoto(photo)
-    //   })
+      const data = response
+      if (page === 'newForm') {
+        navigation.navigate('ReviewForm', { locID: null, location: '', town: '', photo: data })
+      } else if (page === 'currentReview') {
+        navigation.navigate('Review', { reviewID: null, overall: null, price: null, quality: null, cleanliness: null, body: '', locID: null, location: '', town: '', photo: data })
+      } else {
+        navigation.navigate('Home')
+      }
     })
   }
 

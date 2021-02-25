@@ -170,7 +170,7 @@ class LikedReviews extends Component {
                 <Text style={{ fontSize: 14, color: '#9FA5AA' }}>{card.review.review_body}</Text>
               </Block>
               <Button
-                onPress={() => navigation.navigate('Review', { reviewID: card.review.review_id, overall: card.review.overall_rating, price: card.review.price_rating, quality: card.review.quality_rating, cleanliness: card.review.clenliness_rating, body: card.review.review_body, locID: card.location.location_id, location: card.location.location_name, town: card.location.location_town })} style={{
+                onPress={() => navigation.navigate('Review', { reviewID: card.review.review_id, overall: card.review.overall_rating, price: card.review.price_rating, quality: card.review.quality_rating, cleanliness: card.review.clenliness_rating, body: card.review.review_body, locID: card.location.location_id, location: card.location.location_name, town: card.location.location_town, photo: null })} style={{
                   width: 16 * 2,
                   backgroundColor: 'transparent',
                   elevation: 0

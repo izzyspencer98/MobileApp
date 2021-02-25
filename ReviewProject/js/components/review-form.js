@@ -6,6 +6,7 @@ import { AirbnbRating } from 'react-native-ratings'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import reviewFetch from '../api/review'
 import userFetch from '../api/user'
+import photoFetch from '../api/photo'
 
 class NewReview extends Component {
   constructor (props) {
@@ -32,18 +33,16 @@ class NewReview extends Component {
     this.unmount = navigation.addListener('focus', () => {
       this.componentDidMount()
     })
-    if (photo === '') {
-      console.log('NO PHOTO')
+    if (photo === null) {
       this.setState({ isLoading: false })
       this.setState({ hasPhoto: false })
       this.setState({ locID: locID })
       this.setState({ location: location })
       this.setState({ town: town })
     }
-    if (photo !== '') {
-      console.log('PHOTO FOUND')
+    if (photo !== null) {
       this.setState({ isLoading: true, photo: photo }, () => {
-        this.checkForPhoto()
+        this.checkForPhoto(photo)
       })
     }
   }
@@ -52,16 +51,12 @@ class NewReview extends Component {
     this.unmount()
   }
 
-  checkForPhoto () {
-    console.log('OPEN')
-
-    const photo = this.state.photo
-    if (photo !== '') {
-      const uriPhoto = 'data:image/png;base64,' + photo
-      this.setState({ hasPhoto: true, uriPhoto: uriPhoto }, () => {
-        this.setState({ isLoading: false })
-      })
-    }
+  checkForPhoto (photo) {
+    const uriPhoto = photo.uri
+    console.log('PHOTO URI - ' + uriPhoto)
+    this.setState({ hasPhoto: true, uriPhoto: uriPhoto }, () => {
+      this.setState({ isLoading: false })
+    })
   }
 
   async addReview () {
@@ -70,7 +65,7 @@ class NewReview extends Component {
     const { locID, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody } = this.state
     const response = await reviewFetch.addReview(locID, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody)
     if (response === 201) {
-      this.addPhoto(reviewBody)
+      this.addPhoto(locID, reviewBody)
       navigation.navigate('Home')
     }
     if (response === 401) {
@@ -81,8 +76,14 @@ class NewReview extends Component {
     }
   }
 
-  async addPhoto (reviewBody) {
+  async addPhoto (locID, reviewBody) {
+    const navigation = this.props.navigation
     const revID = await userFetch.getReviewID(reviewBody)
+    const photo = this.state.photo
+    const response = await photoFetch.postPhoto(locID, revID, photo)
+    if (response === 401) {
+      navigation.navigate('Login')
+    }
   }
 
   render () {
@@ -138,13 +139,13 @@ class NewReview extends Component {
                 <Text style={{ fontSize: 18, color: '#697177', paddingBottom: 5 }}>{town}</Text>
               </Block>
               {hasPhoto
-                ? <TouchableOpacity onPress={() => navigation.navigate('Camera')}>
+                ? <TouchableOpacity onPress={() => navigation.navigate('Camera', { page: 'newForm' })}>
                   <Image
                     style={{ width: 130, height: 100, borderRadius: 3 }}
                     source={{ uri: uriPhoto }}
                   />
-                  </TouchableOpacity>
-                : <TouchableOpacity onPress={() => navigation.navigate('Camera')}>
+                </TouchableOpacity>
+                : <TouchableOpacity onPress={() => navigation.navigate('Camera', { page: 'newForm' })}>
                   <Block
                     middle style={{
                       width: 130,
@@ -156,7 +157,7 @@ class NewReview extends Component {
                     <Text style={{ fontSize: 20, color: '#7B8CDE' }}>+</Text>
                     <Text style={{ fontSize: 14, color: '#7B8CDE' }}>Add Image</Text>
                   </Block>
-                </TouchableOpacity>}
+                  </TouchableOpacity>}
             </Block>
             <Block
               middle style={{
