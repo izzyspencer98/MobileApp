@@ -3,7 +3,7 @@ Isabelle Spencer - 17103068
 
 ## Version Control
 I used GitHub desktop for version control, which I use for all other projects. When developing on my own application, I always set up a development branch under the main. I make regular commits to the dev branch and only push to main when the feature/section is fully functional.
-Public Repo link - 
+Public Repo link - https://github.com/izzyspencer98/MobileApp/
 
 ## App Intro
 I designed this application based off the Galio framework - https://galio.io
