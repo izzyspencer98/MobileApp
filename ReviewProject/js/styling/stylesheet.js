@@ -2,184 +2,406 @@ import { StyleSheet } from 'react-native'
 
 const styles = StyleSheet.create({
 
+  // main
+  mainContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  ratingBlock: {
+    width: 320,
+    paddingBottom: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#697177'
+  },
+  coffidaBanner: {
+    width: 240,
+    height: 60
+  },
+  bannerImage: {
+    width: 370,
+    height: 190,
+    borderRadius: 3
+  },
+  blockImage: {
+    width: 130,
+    height: 100,
+    borderRadius: 3
+  },
+  blockImageEmpty: {
+    width: 130,
+    height: 100,
+    borderWidth: 1,
+    borderColor: '#7B8CDE'
+  },
+  cardImage: {
+    width: 370,
+    height: 190,
+    borderTopLeftRadius: 3,
+    borderTopRightRadius: 3
+  },
+  thumbnail: {
+    width: 60,
+    height: 60
+  },
+  headerIcon: {
+    width: 80,
+    height: 80
+  },
+  largeHeaderIcon: {
+    width: 90,
+    height: 90
+  },
+  ratingBottomBlock: {
+    padding: 5,
+    paddingBottom: 10
+  },
+  reviewBlock: {
+    width: 320,
+    padding: 10
+  },
+  reviewBlock2: {
+    width: 320,
+    paddingBottom: 20
+  },
+  margin15: {
+    margin: 15
+  },
+  mLeft10: {
+    marginLeft: 10
+  },
+  mRight10: {
+    marginRight: 10
+  },
+  mTop5: {
+    marginTop: 5
+  },
+  mBottom10: {
+    marginBottom: 10
+  },
+  padding5: {
+    padding: 5
+  },
+  padding10: {
+    padding: 10
+  },
+  pHorizontal15: {
+    paddingHorizontal: 15
+  },
+  pHorizontal10: {
+    paddingHorizontal: 10
+  },
+  pRight15: {
+    paddingRight: 15
+  },
+  pRight50: {
+    paddingRight: 50
+  },
+  pRight120: {
+    paddingRight: 120
+  },
+  pLeft10: {
+    paddingLeft: 10
+  },
+  pLeft15: {
+    paddingLeft: 15
+  },
+  pLeft120: {
+    paddingLeft: 120
+  },
+  pTop5: {
+    paddingTop: 5
+  },
+  pTop10: {
+    paddingTop: 10
+  },
+  pTop20: {
+    paddingTop: 20
+  },
+  pTop40: {
+    paddingTop: 40
+  },
+  pBottom5: {
+    paddingBottom: 5
+  },
+  pBottom10: {
+    paddingBottom: 10
+  },
+  text18: {
+    fontSize: 18
+  },
+  text19: {
+    fontSize: 19
+  },
+  noDataText: {
+    textAlign: 'center',
+    color: '#000000'
+  },
+  locationNameText: {
+    fontSize: 25,
+    color: '#001D4A'
+  },
+  locationTownText: {
+    fontSize: 18,
+    color: '#697177',
+    paddingBottom: 5
+  },
+  distanceText: {
+    paddingLeft: 6,
+    fontSize: 13,
+    color: '#7B8CDE'
+  },
+  plusText: {
+    fontSize: 20,
+    color: '#7B8CDE'
+  },
+  addImageText: {
+    fontSize: 14,
+    color: '#7B8CDE'
+  },
+  ratingTitle: {
+    fontSize: 20,
+    color: '#001D4A'
+  },
+  ratingText: {
+    fontSize: 16,
+    paddingRight: 6
+  },
+  reviewCardBody: {
+    fontSize: 14,
+    color: '#9FA5AA',
+    textAlign: 'center'
+  },
+  reviewCardLikes: {
+    fontSize: 14,
+    color: '#9FA5AA'
+  },
+  reviewTitle: {
+    fontSize: 20,
+    color: '#001D4A',
+    paddingBottom: 10
+  },
+  reviewSubTitle: {
+    fontSize: 14,
+    color: '#697177',
+    paddingBottom: 10,
+    textAlign: 'center'
+  },
+  reviewInput: {
+    borderColor: '#7B8CDE',
+    borderWidth: 2,
+    backgroundColor: '#F2F2F2',
+    elevation: 3,
+    height: 80
+  },
+  textInput: {
+    borderColor: '#7B8CDE',
+    borderWidth: 2,
+    backgroundColor: '#F2F2F2',
+    elevation: 3
+  },
+  reviewBtn: {
+    elevation: 4,
+    marginTop: 20
+  },
+  writeReviewBtn: {
+    elevation: 4,
+    marginTop: 10
+  },
+  mainBtn: {
+    elevation: 4,
+    marginTop: 20
+  },
+  elevation4: {
+    elevation: 4
+  },
+
   // home
   homeContainer: {
-    flex: 1,
-    backgroundColor: '#001D4A'
-  },
-  homeText: {
-    color: '#FFFFFF'
-  },
-  homeFlex: {
-    flex: 1,
-    backgroundColor: '#430C05',
     alignItems: 'center',
-    justifyContent: 'center'
+    marginHorizontal: 15,
+    marginTop: 15,
+    marginBottom: 5
   },
-  coffiDaLogoHome: {
-    height: 50,
-    width: 200,
-    marginBottom: 20
+  homeCard: {
+    flexDirection: 'column',
+    borderColor: 'transparent',
+    marginHorizontal: 20,
+    marginVertical: 12,
+    paddingBottom: 16,
+    backgroundColor: '#FFFFFF',
+    shadowOpacity: 0.40,
+    elevation: 4
   },
-  homeBanner: {
-    height: 360,
-    width: null
-  },
-  exploreView: {
-    flex: 1,
-    marginTop: 20,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  exploreText: {
-    fontFamily: 'sans-serif-medium',
-    fontWeight: 'bold',
-    fontSize: 25,
-    color: '#2B3A67'
-  },
-  arrowIcon: {
-    color: '#2B3A67'
-  },
-  shopCardStyle: {
-    marginHorizontal: 20
+  homeCardText: {
+    fontSize: 15,
+    color: '#697177'
   },
 
   // login / logout / signup
-  startContainer: {
-    flex: 1,
-    backgroundColor: '#001D4A',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  coffiDaLogo: {
-    height: 70,
-    width: 260,
-    marginBottom: 20
-  },
-  coffiDaText: {
-    fontFamily: 'sans-serif-medium',
-    fontWeight: 'bold',
-    fontSize: 60,
-    padding: 30,
-    color: '#FFFFFF'
-  },
-  inputView: {
-    width: '70%',
-    backgroundColor: '#7B8CDE',
-    borderRadius: 25,
-    height: 50,
-    marginBottom: 20,
-    justifyContent: 'center',
-    padding: 20
-  },
-  inputText: {
-    height: 50,
-    color: '#FFFFFF'
-  },
-  loginBtn: {
-    width: '85%',
-    backgroundColor: '#FE5F55',
-    borderRadius: 25,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 40,
-    marginBottom: 10
-  },
-  noAccountText: {
-    marginTop: 20,
-    color: '#FFFFFF'
-  },
-  signUpBtn: {
-    width: '40%',
-    backgroundColor: '#FE5F55',
-    borderRadius: 25,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
-    marginBottom: 10
-  },
-  registeredText: {
-    marginTop: 20,
-    color: '#FFFFFF'
-  },
-  logoutText: {
-    marginTop: 10,
-    color: '#FFFFFF',
-    fontSize: 30
-  },
-  logoutBtnText: {
-    color: '#FFFFFF',
-    fontSize: 15
-  },
-
   // search
-  // shop
-  cardStyle: {
-    marginBottom: 20,
-    borderRadius: 8,
-    borderWidth: 5,
-    borderColor: '#f0b67f'
+  searchContainer: {
+    marginHorizontal: 40,
+    marginTop: 5
+  },
+  searchRatingsText: {
+    fontSize: 17,
+    color: '#001D4A',
+    paddingTop: 10,
+    paddingBottom: 5
+  },
+  searchOnlyText: {
+    fontSize: 15,
+    marginBottom: 5,
+    textAlign: 'center'
+  },
+  paginationArrows: {
+    width: 30,
+    height: 20
+  },
+  searchCardContainer: {
+    flexDirection: 'column',
+    borderColor: 'transparent',
+    marginHorizontal: 20,
+    marginVertical: 12,
+    paddingBottom: 16,
+    backgroundColor: '#FFFFFF',
+    shadowOpacity: 0.40,
+    elevation: 4
+  },
+  searchCardText: {
+    fontSize: 15,
+    color: '#697177'
   },
 
-  // review
+  // shop
+  shopContainer: {
+    width: 320,
+    margin: 10,
+    paddingBottom: 20,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#697177'
+  },
+  shopText: {
+    fontSize: 18,
+    color: '#697177'
+  },
+  shopDistanceText: {
+    paddingLeft: 4,
+    fontSize: 14,
+    color: '#697177'
+  },
+  reviewCard: {
+    borderColor: 'transparent',
+    marginVertical: 16 / 2,
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    shadowOpacity: 0.40,
+    elevation: 4
+  },
+
+  // current review
+  myReviewContainer: {
+    width: 340,
+    margin: 10,
+    paddingBottom: 20,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#697177'
+  },
+  myReviewImageText: {
+    fontSize: 25,
+    color: '#001D4A',
+    paddingTop: 15
+  },
+
+  // review form
+  newReviewContainer: {
+    width: 320,
+    margin: 10,
+    paddingBottom: 20,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#697177'
+  },
+
   // account
-  accountContainer: {
-    flex: 1,
-    backgroundColor: '#001D4A',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  accountHeader: {
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  accountIcon: {
-    height: 70,
-    width: 70,
-    marginBottom: 20
-  },
   accountTitle: {
-    fontFamily: 'sans-serif-medium',
     fontSize: 30,
     marginBottom: 10,
-    color: '#FFFFFF'
+    color: '#001D4A'
   },
-  accountText: {
-    fontFamily: 'sans-serif-medium',
+  accountSubTitle: {
     fontSize: 14,
     marginBottom: 20,
     marginHorizontal: 20,
     textAlign: 'center',
-    color: '#FFFFFF'
+    color: '#697177'
   },
-  accountTextInput: {
-    height: 50,
-    color: '#FFFFFF'
+  accountContainer: {
+    marginHorizontal: 60,
+    padding: 10
   },
-  accountInputView: {
-    width: '70%',
-    backgroundColor: '#7B8CDE',
-    borderRadius: 25,
-    height: 50,
-    marginBottom: 20,
-    justifyContent: 'center',
-    padding: 20
-  },
-  updateAccountBtn: {
-    width: '85%',
-    backgroundColor: '#FE5F55',
-    borderRadius: 25,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 40,
-    marginBottom: 10
-  }
 
   // my reviews
+  myReviewsCard: {
+    borderColor: 'transparent',
+    marginHorizontal: 16,
+    marginVertical: 16 / 2,
+    padding: 16,
+    marginTop: 20,
+    backgroundColor: '#FFFFFF',
+    shadowOpacity: 0.40,
+    elevation: 4
+  },
+  myReviewsCardText: {
+    fontSize: 15,
+    color: '#697177'
+  },
+  editText: {
+    fontSize: 13,
+    color: '#7B8CDE'
+  },
+
   // liked reviews
+  likedReviewsCard: {
+    borderColor: 'transparent',
+    marginHorizontal: 16,
+    marginVertical: 16 / 2,
+    padding: 16,
+    marginTop: 20,
+    backgroundColor: '#FFFFFF',
+    shadowOpacity: 0.40,
+    elevation: 4
+  },
+  likedCardText: {
+    fontSize: 15,
+    color: '#697177'
+  },
+
+  // favourite shops
+  favouriteCard: {
+    flexDirection: 'column',
+    borderColor: 'transparent',
+    marginHorizontal: 20,
+    marginVertical: 12,
+    paddingBottom: 16,
+    backgroundColor: '#FFFFFF',
+    shadowOpacity: 0.40,
+    elevation: 4
+  },
+  favouriteCardText: {
+    fontSize: 15,
+    color: '#697177'
+  },
+
+  // camera
+  cameraStyle: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center'
+  },
+  cameraHiddenText: {
+    color: '#F2F2F2'
+  }
 
 })
 

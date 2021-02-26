@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
-import { View, Text, ActivityIndicator, ScrollView, Image, ToastAndroid, Alert } from 'react-native'
-import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Text, ActivityIndicator, ScrollView, Image, Alert } from 'react-native'
+import { Block, Button, Input } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import reviewFetch from '../api/review'
 import userFetch from '../api/user'
 import photoFetch from '../api/photo'
 import profFilter from '../components/profanity-filter.json'
+import styles from '../styling/stylesheet'
 
 class NewReview extends Component {
   constructor (props) {
@@ -38,11 +38,13 @@ class NewReview extends Component {
       this.componentDidMount()
     })
     if (photo === null) {
-      this.setState({ isLoading: false })
-      this.setState({ hasPhoto: false })
-      this.setState({ locID: locID })
-      this.setState({ location: location })
-      this.setState({ town: town })
+      this.setState({
+        isLoading: false,
+        hasPhoto: false,
+        locID: locID,
+        location: location,
+        town: town
+      })
     }
     if (photo !== null) {
       this.setState({ isLoading: true, photo: photo }, () => {
@@ -114,11 +116,7 @@ class NewReview extends Component {
       return (
         <Block
           middle
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          style={styles.mainContainer}
         >
           <ActivityIndicator size='large' color='#7B8CDE' />
         </Block>
@@ -129,76 +127,44 @@ class NewReview extends Component {
         <ScrollView>
           <Block
             middle
-            style={{
-              margin: 15
-            }}
+            style={styles.margin15}
           >
             <Block
               row
               middle
-              style={{
-                width: 320,
-                margin: 10,
-                paddingBottom: 20,
-                borderBottomWidth: 0.5,
-                borderBottomColor: '#697177'
-              }}
+              style={styles.newReviewContainer}
             >
               <Block
                 middle
-                style={{
-                  paddingRight: 50
-                }}
+                style={styles.pRight50}
               >
-                <Text style={{
-                  fontSize: 25,
-                  color: '#001D4A'
-                }}
-                >{location}
-                </Text>
-                <Text style={{ fontSize: 18, color: '#697177', paddingBottom: 5 }}>{town}</Text>
+                <Text style={styles.locationNameText}>{location}</Text>
+                <Text style={styles.locationTownText}>{town}</Text>
               </Block>
               {hasPhoto
                 ? <TouchableOpacity onPress={() => navigation.navigate('Camera', { page: 'newForm' })}>
                   <Image
-                    style={{ width: 130, height: 100, borderRadius: 3 }}
+                    style={styles.blockImage}
                     source={{ uri: uriPhoto }}
                   />
-                </TouchableOpacity>
+                  </TouchableOpacity>
                 : <TouchableOpacity onPress={() => navigation.navigate('Camera', { page: 'newForm' })}>
                   <Block
-                    middle style={{
-                      width: 130,
-                      height: 100,
-                      borderWidth: 1,
-                      borderColor: '#7B8CDE'
-                    }}
+                    middle style={styles.blockImageEmpty}
                   >
-                    <Text style={{ fontSize: 20, color: '#7B8CDE' }}>+</Text>
-                    <Text style={{ fontSize: 14, color: '#7B8CDE' }}>Add Image</Text>
+                    <Text style={styles.plusText}>+</Text>
+                    <Text style={styles.addImageText}>Add Image</Text>
                   </Block>
                   </TouchableOpacity>}
             </Block>
             <Block
-              middle style={{
-                width: 320,
-                paddingBottom: 10,
-                borderBottomWidth: 0.5,
-                borderBottomColor: '#697177'
-              }}
+              middle style={styles.ratingBlock}
             >
-              <Text style={{
-                fontSize: 20,
-                color: '#001D4A'
-              }}
-              >Rating
-              </Text>
+              <Text style={styles.ratingTitle}>Rating</Text>
               <Block
-                row style={{
-                  padding: 10
-                }}
+                row style={styles.padding10}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Overall</Text>
+                <Text style={styles.ratingText}>Overall</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={0}
@@ -213,11 +179,9 @@ class NewReview extends Component {
                 />
               </Block>
               <Block
-                row style={{
-                  padding: 5
-                }}
+                row style={styles.padding5}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Price</Text>
+                <Text style={styles.ratingText}>Price</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={0}
@@ -232,11 +196,9 @@ class NewReview extends Component {
                 />
               </Block>
               <Block
-                row style={{
-                  padding: 5
-                }}
+                row style={styles.padding5}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Quality</Text>
+                <Text style={styles.ratingText}>Quality</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={0}
@@ -251,12 +213,9 @@ class NewReview extends Component {
                 />
               </Block>
               <Block
-                row style={{
-                  padding: 5,
-                  paddingBottom: 10
-                }}
+                row style={styles.ratingBottomBlock}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Cleanliness</Text>
+                <Text style={styles.ratingText}>Cleanliness</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={0}
@@ -272,35 +231,13 @@ class NewReview extends Component {
               </Block>
             </Block>
             <Block
-              middle style={{
-                width: 320,
-                padding: 10
-              }}
+              middle style={styles.reviewBlock}
             >
-              <Text style={{
-                fontSize: 20,
-                color: '#001D4A',
-                paddingBottom: 10
-              }}
-              >Review
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                color: '#697177',
-                paddingBottom: 10,
-                textAlign: 'center'
-              }}
-              >Please comment on your overall experience at {location}, {town}.
-              </Text>
+              <Text style={styles.reviewTitle}>Review</Text>
+              <Text style={styles.reviewSubTitle}>Please comment on your overall experience at {location}, {town}.</Text>
               <Input
                 rounded
-                style={{
-                  borderColor: '#7B8CDE',
-                  borderWidth: 2,
-                  backgroundColor: '#F2F2F2',
-                  elevation: 3,
-                  height: 80
-                }}
+                style={styles.reviewInput}
                 placeholderTextColor='#001D4A'
                 onChangeText={(reviewBody) => this.setState({ reviewBody })}
                 value={this.state.reviewBody}
@@ -309,10 +246,7 @@ class NewReview extends Component {
                 round
                 size='small'
                 color='#FE5F55'
-                style={{
-                  elevation: 5,
-                  marginTop: 20
-                }}
+                style={styles.reviewBtn}
                 onPress={() => this.addReview()}
               >
                 Post Review

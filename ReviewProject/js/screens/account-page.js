@@ -1,11 +1,10 @@
 import React, { Component } from 'react'
-import { View, Text, Alert, TouchableOpacity, Image, ActivityIndicator } from 'react-native'
+import { Text, Image, ActivityIndicator } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import styles from '../styling/stylesheet'
-import { Container } from 'native-base'
-import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
+import { Block, Button, Input } from 'galio-framework'
 import { ScrollView } from 'react-native-gesture-handler'
 import userFetch from '../api/user'
+import styles from '../styling/stylesheet'
 
 class Account extends Component {
   constructor (props) {
@@ -86,11 +85,7 @@ class Account extends Component {
       return (
         <Block
           middle
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          style={styles.mainContainer}
         >
           <ActivityIndicator size='large' color='#7B8CDE' />
         </Block>
@@ -100,56 +95,29 @@ class Account extends Component {
     return (
       <ScrollView>
         <Block>
-          <Block middle style={{ paddingTop: 40 }}>
+          <Block middle style={styles.pTop40}>
             <Image
-              style={{ width: 80, height: 80 }}
+              style={styles.headerIcon}
               source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612982465/MobileApp/profile-purple_sapa50.png' }}
             />
-            <Text style={{
-              fontSize: 30,
-              marginBottom: 10,
-              color: '#001D4A'
-            }}
-            >Account Details
-            </Text>
-            <Text style={{
-              fontSize: 14,
-              marginBottom: 20,
-              marginHorizontal: 20,
-              textAlign: 'center',
-              color: '#697177'
-            }}
-            >Edit your details below and then click the button to update your account.
-            </Text>
+            <Text style={styles.accountTitle}>Account Details</Text>
+            <Text style={styles.accountSubTitle}>Edit your details below and then click the button to update your account.</Text>
           </Block>
           <Block
             middle
-            style={{
-              marginHorizontal: 60,
-              padding: 10
-            }}
+            style={styles.accountContainer}
           >
             <Input
               rounded
               placeholder={userDetails.first_name}
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               placeholderTextColor='#001D4A'
               onChangeText={(newFirstName) => this.setState({ newFirstName })}
             />
             <Input
               rounded
               placeholder={userDetails.last_name}
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               placeholderTextColor='#001D4A'
               onChangeText={(newLastName) => this.setState({ newLastName })}
             />
@@ -157,12 +125,7 @@ class Account extends Component {
               type='email-address'
               rounded
               placeholder={userDetails.email}
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               placeholderTextColor='#001D4A'
               onChangeText={(newEmail) => this.setState({ newEmail })}
             />
@@ -170,12 +133,7 @@ class Account extends Component {
               password
               rounded
               placeholder='********'
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               icon='lock'
               family='antdesign'
               iconColor='#001D4A'
@@ -188,17 +146,13 @@ class Account extends Component {
           </Block>
           <Block
             middle
-            style={{
-              paddingTop: 10
-            }}
+            style={styles.pTop10}
           >
             <Button
               round
               size='large'
               color='#FE5F55'
-              style={{
-                elevation: 5
-              }}
+              style={styles.elevation4}
               onPress={() => this.updateAccount()}
             >
               Update Account

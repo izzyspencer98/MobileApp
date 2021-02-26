@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { View, Text, TextInput, TouchableOpacity, Alert, Image, ScrollView } from 'react-native'
-import styles from '../styling/stylesheet'
-import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
+import { Text, Image, ScrollView } from 'react-native'
+import { Block, Button, Input } from 'galio-framework'
 import accountFetch from '../api/account'
+import styles from '../styling/stylesheet'
 
 class SignUp extends Component {
   constructor (props) {
@@ -37,31 +37,20 @@ class SignUp extends Component {
         <Block>
           <Block
             middle
-            style={{
-              marginHorizontal: 60,
-              padding: 10,
-              marginTop: 50
-            }}
+            style={styles.loginContainer}
           >
             <Block
-              middle style={{
-                padding: 10
-              }}
+              middle style={styles.padding10}
             >
               <Image
-                style={{ width: 300, height: 80, marginBottom: 20 }}
+                style={styles.loginImg}
                 source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1613039533/MobileApp/coffida-purple_srvd8k.png' }}
               />
             </Block>
             <Input
               rounded
               placeholder='First Name'
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               placeholderTextColor='#001D4A'
               onChangeText={(firstName) => this.setState({ firstName })}
               value={this.state.firstName}
@@ -69,12 +58,7 @@ class SignUp extends Component {
             <Input
               rounded
               placeholder='Last Name'
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               placeholderTextColor='#001D4A'
               onChangeText={(lastName) => this.setState({ lastName })}
               value={this.state.lastName}
@@ -83,12 +67,7 @@ class SignUp extends Component {
               type='email-address'
               rounded
               placeholder='Email'
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               placeholderTextColor='#001D4A'
               onChangeText={(email) => this.setState({ email })}
               value={this.state.email}
@@ -97,12 +76,7 @@ class SignUp extends Component {
               password
               rounded
               placeholder='Password'
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               icon='lock'
               family='antdesign'
               iconColor='#697177'
@@ -116,36 +90,23 @@ class SignUp extends Component {
           </Block>
           <Block
             middle
-            style={{
-              paddingTop: 20
-            }}
+            style={styles.pTop20}
           >
             <Button
               round
               size='large'
               color='#FE5F55'
-              style={{
-                elevation: 5
-              }}
+              style={styles.elevation4}
               onPress={() => this.registerUser()}
             >
               Sign Up
             </Button>
-            <Text style={{
-              fontSize: 14,
-              marginTop: 15,
-              textAlign: 'center',
-              color: '#697177'
-            }}
-            >Already registered?
-            </Text>
+            <Text style={styles.accountText}>Already registered?</Text>
             <Button
               round
               size='small'
               color='#FE5F55'
-              style={{
-                elevation: 5
-              }}
+              style={styles.elevation4}
               onPress={() => navigation.navigate('Login')}
             >
               Login

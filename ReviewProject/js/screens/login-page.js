@@ -1,11 +1,10 @@
 import React, { Component } from 'react'
-import { View, Text, TouchableOpacity, Alert, ToastAndroid, Image } from 'react-native'
+import { Text, Image } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { ScrollView, TextInput } from 'react-native-gesture-handler'
-import { Container } from 'native-base'
-import styles from '../styling/stylesheet'
-import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
+import { ScrollView } from 'react-native-gesture-handler'
+import { Block, Button, Input } from 'galio-framework'
 import accountFetch from '../api/account'
+import styles from '../styling/stylesheet'
 
 class Login extends Component {
   constructor (props) {
@@ -36,19 +35,13 @@ class Login extends Component {
         <Block>
           <Block
             middle
-            style={{
-              marginHorizontal: 60,
-              padding: 10,
-              marginTop: 100
-            }}
+            style={styles.loginContainer}
           >
             <Block
-              middle style={{
-                padding: 10
-              }}
+              middle style={styles.padding10}
             >
               <Image
-                style={{ width: 300, height: 80, marginBottom: 20 }}
+                style={styles.loginImg}
                 source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1613039533/MobileApp/coffida-purple_srvd8k.png' }}
               />
             </Block>
@@ -56,12 +49,7 @@ class Login extends Component {
               type='email-address'
               rounded
               placeholder='Email'
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               placeholderTextColor='#001D4A'
               onChangeText={(email) => this.setState({ email })}
               value={this.state.email}
@@ -70,12 +58,7 @@ class Login extends Component {
               password
               rounded
               placeholder='Password'
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               icon='lock'
               family='antdesign'
               iconColor='#697177'
@@ -87,36 +70,23 @@ class Login extends Component {
           </Block>
           <Block
             middle
-            style={{
-              paddingTop: 10
-            }}
+            style={styles.pTop10}
           >
             <Button
               round
               size='large'
               color='#FE5F55'
-              style={{
-                elevation: 5
-              }}
+              style={styles.elevation4}
               onPress={() => this.loginUser()}
             >
               Login
             </Button>
-            <Text style={{
-              fontSize: 14,
-              marginTop: 15,
-              textAlign: 'center',
-              color: '#697177'
-            }}
-            >Don't Have an Account?
-            </Text>
+            <Text style={styles.accountText}>Don't Have an Account?</Text>
             <Button
               round
               size='small'
               color='#FE5F55'
-              style={{
-                elevation: 5
-              }}
+              style={styles.elevation4}
               onPress={() => navigation.navigate('Sign Up')}
             >
               Sign Up

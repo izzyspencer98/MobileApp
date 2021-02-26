@@ -1,15 +1,13 @@
 import React, { Component } from 'react'
-import { View, Text } from 'native-base'
-import { Alert, ActivityIndicator, ScrollView, Image, ToastAndroid, TouchableNativeFeedbackBase } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import styles from '../styling/stylesheet'
-import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
+import { ActivityIndicator, ScrollView, Image, Text } from 'react-native'
+import { Block, Button, Icon } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import openMap from 'react-native-open-maps'
 import locationFetch from '../api/location'
 import favouriteFetch from '../api/favourites'
 import userFetch from '../api/user'
+import styles from '../styling/stylesheet'
 
 class Shop extends Component {
   constructor (props) {
@@ -117,11 +115,7 @@ class Shop extends Component {
       return (
         <Block
           middle
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          style={styles.mainContainer}
         >
           <ActivityIndicator size='large' color='#7B8CDE' />
         </Block>
@@ -133,66 +127,41 @@ class Shop extends Component {
         <ScrollView>
           <Block
             middle
-            style={{
-              margin: 15
-            }}
+            style={styles.margin15}
           >
             <Image
-              style={{ width: 370, height: 190, borderRadius: 3 }}
+              style={styles.bannerImage}
               source={{ uri: path }}
             />
             <Block
-              middle style={{
-                width: 320,
-                margin: 10,
-                paddingBottom: 20,
-                borderBottomWidth: 0.5,
-                borderBottomColor: '#697177'
-              }}
+              middle style={styles.shopContainer}
             >
               <Block row middle>
-                <Text style={{
-                  fontSize: 25,
-                  color: '#001D4A'
-                }}
-                >{shopInfo.location_name}
-                </Text>
+                <Text style={styles.locationNameText}>{shopInfo.location_name}</Text>
                 <TouchableOpacity onPress={() => this.handleFavourite()}>
                   {isFavourited
                     ? <Icon size={35} name='star' family='Ionicons' color='#FE5F55' />
                     : <Icon size={35} name='star-outline' family='Ionicons' color='#FE5F55' />}
                 </TouchableOpacity>
               </Block>
-              <Text style={{ fontSize: 18, color: '#697177' }}>{shopInfo.location_town}</Text>
+              <Text style={styles.shopText}>{shopInfo.location_town}</Text>
               <TouchableOpacity onPress={() => this.openMaps()}>
                 <Block
                   row
                   middle
-                  style={{
-                    marginTop: 5
-                  }}
+                  style={styles.mTop5}
                 >
                   <Icon size={18} name='enviroment' family='AntDesign' color='#697177' />
-                  <Text style={{ paddingLeft: 4, fontSize: 14, color: '#697177' }}>{distance} Kilometers away</Text>
+                  <Text style={styles.shopDistanceText}>{distance} Kilometers away</Text>
                 </Block>
               </TouchableOpacity>
             </Block>
             <Block
-              middle style={{
-                width: 320,
-                paddingBottom: 20
-              }}
+              middle style={styles.reviewBlock2}
             >
-              <Text style={{
-                fontSize: 20,
-                color: '#001D4A',
-                paddingBottom: 10
-              }}
-              >Reviews
-              </Text>
-              {/* map here */}
+              <Text style={styles.reviewTitle}>Reviews</Text>
               <Block row>
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Overall</Text>
+                <Text style={styles.ratingText}>Overall</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={shopInfo.avg_overall_rating}
@@ -207,7 +176,7 @@ class Shop extends Component {
                 />
               </Block>
               <Block row>
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Price</Text>
+                <Text style={styles.ratingText}>Price</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={shopInfo.avg_price_rating}
@@ -222,7 +191,7 @@ class Shop extends Component {
                 />
               </Block>
               <Block row>
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Quality</Text>
+                <Text style={styles.ratingText}>Quality</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={shopInfo.avg_quality_rating}
@@ -237,7 +206,7 @@ class Shop extends Component {
                 />
               </Block>
               <Block row>
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Cleanliness</Text>
+                <Text style={styles.ratingText}>Cleanliness</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={shopInfo.avg_clenliness_rating}
@@ -256,10 +225,7 @@ class Shop extends Component {
                   round
                   size='small'
                   color='#FE5F55'
-                  style={{
-                    elevation: 5,
-                    marginTop: 10
-                  }}
+                  style={styles.writeReviewBtn}
                   onPress={() => navigation.navigate('ReviewForm', { locID: shopInfo.location_id, location: shopInfo.location_name, town: shopInfo.location_town, photo: null })}
                 >
                   Write Review
@@ -268,21 +234,14 @@ class Shop extends Component {
               {shopInfo && shopInfo.location_reviews && shopInfo.location_reviews.map((card, index) => (
                 <Block
                   key={index}
-                  row center card shadow space='between' style={{
-                    borderColor: 'transparent',
-                    marginVertical: 16 / 2,
-                    padding: 16,
-                    backgroundColor: '#FFFFFF',
-                    shadowOpacity: 0.40,
-                    elevation: 4
-                  }}
+                  row center card shadow space='between' style={styles.reviewCard}
                 >
                   <Image
-                    style={{ width: 60, height: 60 }}
+                    style={styles.thumbnail}
                     source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1613062691/MobileApp/rating_1_cnr0eb.png' }}
                   />
-                  <Block middle flex style={{ paddingHorizontal: 10 }}>
-                    <Text style={{ fontSize: 18 }}>Overall Rating</Text>
+                  <Block middle flex style={styles.pHorizontal10}>
+                    <Text style={styles.text18}>Overall Rating</Text>
                     <AirbnbRating
                       count={5}
                       defaultRating={card.overall_rating}
@@ -295,8 +254,8 @@ class Shop extends Component {
                         alignSelf: 'flex-start'
                       }}
                     />
-                    <Text style={{ fontSize: 14, color: '#9FA5AA', textAlign: 'center' }}>{card.review_body}</Text>
-                    <Text style={{ fontSize: 14, color: '#9FA5AA' }}>({card.likes} Likes)</Text>
+                    <Text style={styles.reviewCardBody}>{card.review_body}</Text>
+                    <Text style={styles.reviewCardLikes}>({card.likes} Likes)</Text>
                   </Block>
                   <Block middle>
                     <TouchableOpacity onPress={() => navigation.navigate('Review', { reviewID: card.review_id, overall: card.overall_rating, price: card.price_rating, quality: card.quality_rating, cleanliness: card.clenliness_rating, body: card.review_body, locID: shopInfo.location_id, location: shopInfo.location_name, town: shopInfo.location_town, photo: null })}>

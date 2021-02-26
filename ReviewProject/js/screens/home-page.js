@@ -1,16 +1,14 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { Component } from 'react'
-import { Container, Content, CardItem, Thumbnail, Text, Left, Body, Right, View } from 'native-base'
-import { Image, Alert, ActivityIndicator, PermissionsAndroid } from 'react-native'
-import styles from '../styling/stylesheet'
+import { Image, ActivityIndicator, PermissionsAndroid, Text } from 'react-native'
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler'
-import { FloatingAction } from 'react-native-floating-action'
-import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
+import { Block, Button, Icon } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
 import Geolocation from 'react-native-geolocation-service'
 import haversine from 'haversine'
 import search from '../api/search'
+import styles from '../styling/stylesheet'
 
 class Home extends Component {
   constructor (props) {
@@ -139,11 +137,7 @@ class Home extends Component {
       return (
         <Block
           middle
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          style={styles.mainContainer}
         >
           <ActivityIndicator size='large' color='#7B8CDE' />
         </Block>
@@ -156,16 +150,11 @@ class Home extends Component {
           <Block
             row
             space='between'
-            style={{
-              alignItems: 'center',
-              marginHorizontal: 15,
-              marginTop: 15,
-              marginBottom: 5
-            }}
+            style={styles.homeContainer}
           >
             <Block>
               <Image
-                style={{ width: 240, height: 60 }}
+                style={styles.coffidaBanner}
                 source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1613039533/MobileApp/coffida-purple_srvd8k.png' }}
               />
             </Block>
@@ -176,52 +165,37 @@ class Home extends Component {
               iconSize={20}
               iconColor='#FFFFFF'
               color='#7B8CDE'
-              style={{
-                elevation: 10
-              }}
+              style={styles.elevation4}
               onPress={() => navigation.navigate('Search')}
             />
           </Block>
           {shopCardInfo && shopCardInfo.map((data, index) => (
             <Block
               key={index}
-              center card shadow space='between' style={{
-                flexDirection: 'column',
-                borderColor: 'transparent',
-                marginHorizontal: 20,
-                marginVertical: 12,
-                paddingBottom: 16,
-                backgroundColor: '#FFFFFF',
-                shadowOpacity: 0.40,
-                elevation: 4
-              }}
+              center card shadow space='between' style={styles.homeCard}
             >
               <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri, distance: distances.distance })}>
                 <Block>
                   <Block
                     row
                     center
-                    style={{
-                      marginBottom: 10
-                    }}
+                    style={styles.mBottom10}
                   >
                     <Image
-                      style={{ width: 370, height: 190, borderTopLeftRadius: 3, borderTopRightRadius: 3 }}
+                      style={styles.cardImage}
                       source={{ uri: imagePaths[index].uri }}
                     />
                   </Block>
                   <Block
                     row
                     center
-                    style={{
-                      paddingHorizontal: 15
-                    }}
+                    style={styles.pHorizontal15}
                   >
                     <Image
-                      style={{ width: 60, height: 60 }}
+                      style={styles.thumbnail}
                       source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612974814/MobileApp/restaurant_zusegh.png' }}
                     />
-                    <Block flex style={{ paddingLeft: 15 }}>
+                    <Block flex style={styles.pLeft15}>
                       <AirbnbRating
                         count={5}
                         defaultRating={data.avg_overall_rating}
@@ -234,13 +208,13 @@ class Home extends Component {
                           alignSelf: 'flex-start'
                         }}
                       />
-                      <Text style={{ fontSize: 19 }}>{data.location_name}</Text>
-                      <Text style={{ fontSize: 15, color: '#697177' }}>{data.location_town}</Text>
+                      <Text style={styles.text19}>{data.location_name}</Text>
+                      <Text style={styles.homeCardText}>{data.location_town}</Text>
 
                     </Block>
                     <Block row>
                       <Icon size={18} name='enviroment' family='AntDesign' color='#7B8CDE' />
-                      <Text style={{ paddingLeft: 6, fontSize: 13, color: '#7B8CDE' }}>{distances.distance} Km</Text>
+                      <Text style={styles.distanceText}>{distances.distance} Km</Text>
                     </Block>
                   </Block>
                 </Block>
