@@ -1,6 +1,9 @@
 # Mobile App Assignment
 Isabelle Spencer - 17103068
 
+## Screencast
+- Screencast link - https://drive.google.com/file/d/1_SNRze2VWTh3JgLWt4ZuaOpLQLynVAQy/view?usp=sharing
+
 ## Version Control
 I used GitHub desktop for version control, which I use for all other projects. When developing on my own application, I always set up a development branch under the main. I make regular commits to the dev branch and only push to main when the feature/section is fully functional.
 Public Repo link - https://github.com/izzyspencer98/MobileApp/
