@@ -37,7 +37,7 @@ class SignUp extends Component {
         <Block>
           <Block
             middle
-            style={styles.loginContainer}
+            style={styles.signUpContainer}
           >
             <Block
               middle style={styles.padding10}

@@ -107,13 +107,12 @@ class Search extends Component {
 
   getDistance () {
     const { searchResults } = this.state
-    console.log('LAT - ' + searchResults.latitude)
     Geolocation.getCurrentPosition(
       async (position) => {
         const start = { latitude: position.coords.latitude, longitude: position.coords.longitude }
-        const end = { latitude: searchResults.latitude, longitude: searchResults.longitude }
+        const end = { latitude: searchResults[0].latitude, longitude: searchResults[0].longitude }
         const distance = Math.round(haversine(start, end))
-        this.setState({ distances: { location: searchResults.location_id, distance: distance } })
+        this.setState({ distances: { location: searchResults[0].location_id, distance: distance } })
       },
       (error) => {
         console.log(error)
@@ -267,7 +266,7 @@ class Search extends Component {
                 <Block
                   center card shadow space='between' style={styles.searchCardContainer}
                 >
-                  <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri })}>
+                  <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri, distance: distances.distance })}>
                     <Block>
                       <Block
                         row

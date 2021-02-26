@@ -239,6 +239,33 @@ const styles = StyleSheet.create({
   },
 
   // login / logout / signup
+  loginContainer: {
+    marginHorizontal: 60,
+    padding: 10,
+    marginTop: 100
+  },
+  signUpContainer: {
+    marginHorizontal: 60,
+    padding: 10,
+    marginTop: 50
+  },
+  loginImg: {
+    width: 300,
+    height: 80,
+    marginBottom: 20
+  },
+  accountText: {
+    fontSize: 14,
+    marginTop: 15,
+    textAlign: 'center',
+    color: '#697177'
+  },
+  logoutText: {
+    fontSize: 30,
+    marginBottom: 10,
+    color: '#001D4A'
+  },
+
   // search
   searchContainer: {
     marginHorizontal: 40,
