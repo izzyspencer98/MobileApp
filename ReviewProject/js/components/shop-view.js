@@ -48,7 +48,8 @@ class Shop extends Component {
   async getUserDetails () {
     const userDetails = await userFetch.getUserDetails()
     this.setState({
-      userDetails: userDetails
+      userDetails: userDetails,
+      isLoading: false
     }, () => {
       this.checkData()
     })

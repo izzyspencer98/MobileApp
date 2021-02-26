@@ -107,18 +107,20 @@ class Search extends Component {
 
   getDistance () {
     const { searchResults } = this.state
-    Geolocation.getCurrentPosition(
-      async (position) => {
-        const start = { latitude: position.coords.latitude, longitude: position.coords.longitude }
-        const end = { latitude: searchResults[0].latitude, longitude: searchResults[0].longitude }
-        const distance = Math.round(haversine(start, end))
-        this.setState({ distances: { location: searchResults[0].location_id, distance: distance } })
-      },
-      (error) => {
-        console.log(error)
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    )
+    if (searchResults.length > 0) {
+      Geolocation.getCurrentPosition(
+        async (position) => {
+          const start = { latitude: position.coords.latitude, longitude: position.coords.longitude }
+          const end = { latitude: searchResults[0].latitude, longitude: searchResults[0].longitude }
+          const distance = Math.round(haversine(start, end))
+          this.setState({ distances: { location: searchResults[0].location_id, distance: distance } })
+        },
+        (error) => {
+          console.log(error)
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      )
+    }
   }
 
   render () {
