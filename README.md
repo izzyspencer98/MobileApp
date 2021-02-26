@@ -20,6 +20,14 @@ I followed the JS standard because Galio was a tricky framework so I didn't want
 - The heart is clickable for liking reviews.
 - The rating stars are also clickable for posting/updating reviews. (Not clickable if it is someone else's review.)
 
+## Code Structure
+The main code is in a js folder with sub-folders:
+- api (for the requests - since I reuse them throughout the app)
+- components (for stack screens)
+- navigation (for building stack navigations on each of the drawer screens)
+- screens (for the main screens in the drawer nav)
+- styling (for a consistent stylesheet which is split into sections to make styling changes easy)
+
 ## Features
 The application should:
 - Implement all 17 endpoints (with some used multiple times to fetch different sets of data)
