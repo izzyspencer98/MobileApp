@@ -1,18 +1,27 @@
 import React, { Component } from 'react'
-import { View, Text, ActivityIndicator, ScrollView, Image, ToastAndroid, Alert } from 'react-native'
-import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Text, ActivityIndicator, ScrollView, Image, Alert } from 'react-native'
+import { Block, Button, Input } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
 import { TouchableOpacity } from 'react-native-gesture-handler'
+import reviewFetch from '../api/review'
+import userFetch from '../api/user'
+import photoFetch from '../api/photo'
+import profFilter from '../components/profanity-filter.json'
+import styles from '../styling/stylesheet'
 
 class NewReview extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      profFilter: profFilter.profWords,
+      block: false,
       locID: '',
       location: '',
       town: '',
+      photo: '',
+      uriPhoto: '',
       isLoading: true,
+      hasPhoto: false,
       overallRating: 0,
       priceRating: 0,
       qualityRating: 0,
@@ -22,72 +31,92 @@ class NewReview extends Component {
   }
 
   async componentDidMount () {
-    this.setState({ isLoading: false })
-    const { route } = this.props
-    const { locID, location, town } = route.params
-    this.setState({ locID: locID })
-    this.setState({ location: location })
-    this.setState({ town: town })
+    const { navigation, route } = this.props
+    const { locID, location, town, photo } = route.params
+    this.setState({ block: false })
+    this.unmount = navigation.addListener('focus', () => {
+      this.componentDidMount()
+    })
+    if (photo === null) {
+      this.setState({
+        isLoading: false,
+        hasPhoto: false,
+        locID: locID,
+        location: location,
+        town: town
+      })
+    }
+    if (photo !== null) {
+      this.setState({ isLoading: true, photo: photo }, () => {
+        this.checkForPhoto(photo)
+      })
+    }
+  }
+
+  componentWillUnmount () {
+    this.unmount()
+  }
+
+  checkForPhoto (photo) {
+    const uriPhoto = photo.uri
+    console.log('PHOTO URI - ' + uriPhoto)
+    this.setState({ hasPhoto: true, uriPhoto: uriPhoto }, () => {
+      this.setState({ isLoading: false })
+    })
   }
 
   async addReview () {
-    this.setState({ isLoading: true })
-    const { locID } = this.state
+    this.setState({ isLoading: true, block: false })
     const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
-    const toSend = {
-      overall_rating: this.state.overallRating,
-      price_rating: this.state.priceRating,
-      quality_rating: this.state.qualityRating,
-      clenliness_rating: this.state.clenlinessRating,
-      review_body: this.state.reviewBody
+    const { locID, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody } = this.state
+    await this.filter(reviewBody)
+    if (this.state.block === true) {
+      Alert.alert('Please refrain from mentioning any food/beverages other than coffee.')
+      this.setState({ isLoading: false })
     }
+    if (this.state.block === false) {
+      const response = await reviewFetch.addReview(locID, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody)
+      if (response === 201) {
+        this.addPhoto(locID, reviewBody)
+        navigation.navigate('Home')
+      }
+      if (response === 401) {
+        navigation.navigate('Login')
+      }
+      if (response === 404) {
+        navigation.navigate('Logout')
+      }
+    }
+  }
 
-    return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locID + '/review', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      },
-      body: JSON.stringify(toSend)
+  filter (reviewBody) {
+    const profFilter = this.state.profFilter
+    profFilter.forEach(word => {
+      if (reviewBody.includes(word)) {
+        this.setState({ block: true })
+      }
     })
-      .then((response) => {
-        if (response.status === 201) {
-          ToastAndroid.show('Review Posted Successfully', ToastAndroid.SHORT)
-          console.log('new review successful')
-          navigation.navigate('Home')
-        } else if (response.status === 400) {
-          Alert.alert('Review failed. Please ensure all fields are completed before you post.')
-          console.log('new review failed - bad request')
-        } else if (response.status === 401) {
-          Alert.alert('Please login to use this feature')
-          navigation.navigate('Login')
-        } else if (response.status === 404) {
-          Alert.alert('Apologies we cannot post this review. Please log out and log back in.')
-          navigation.navigate('Logout')
-          console.log('new review failed - not found')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('new review failed - server error')
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+  }
+
+  async addPhoto (locID, reviewBody) {
+    const navigation = this.props.navigation
+    const revID = await userFetch.getReviewID(reviewBody)
+    const photo = this.state.photo
+    const response = await photoFetch.postPhoto(locID, revID, photo)
+    if (response === 401) {
+      navigation.navigate('Login')
+    }
   }
 
   render () {
-    const { isLoading, location, town } = this.state
+    const { isLoading, hasPhoto, uriPhoto, location, town } = this.state
+    const navigation = this.props.navigation
 
     if (isLoading) {
       return (
         <Block
           middle
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          style={styles.mainContainer}
         >
           <ActivityIndicator size='large' color='#7B8CDE' />
         </Block>
@@ -98,69 +127,44 @@ class NewReview extends Component {
         <ScrollView>
           <Block
             middle
-            style={{
-              margin: 15
-            }}
+            style={styles.margin15}
           >
             <Block
               row
               middle
-              style={{
-                width: 320,
-                margin: 10,
-                paddingBottom: 20,
-                borderBottomWidth: 0.5,
-                borderBottomColor: '#697177'
-              }}
+              style={styles.newReviewContainer}
             >
               <Block
                 middle
-                style={{
-                  paddingRight: 50
-                }}
+                style={styles.pRight50}
               >
-                <Text style={{
-                  fontSize: 25,
-                  color: '#001D4A'
-                }}
-                >{location}
-                </Text>
-                <Text style={{ fontSize: 18, color: '#697177', paddingBottom: 5 }}>{town}</Text>
+                <Text style={styles.locationNameText}>{location}</Text>
+                <Text style={styles.locationTownText}>{town}</Text>
               </Block>
-              <TouchableOpacity>
-                <Block
-                  middle style={{
-                    width: 130,
-                    height: 100,
-                    borderWidth: 1,
-                    borderColor: '#7B8CDE'
-                  }}
-                >
-                  <Text style={{ fontSize: 20, color: '#7B8CDE' }}>+</Text>
-                  <Text style={{ fontSize: 14, color: '#7B8CDE' }}>Add Image</Text>
-                </Block>
-              </TouchableOpacity>
+              {hasPhoto
+                ? <TouchableOpacity onPress={() => navigation.navigate('Camera', { page: 'newForm' })}>
+                  <Image
+                    style={styles.blockImage}
+                    source={{ uri: uriPhoto }}
+                  />
+                  </TouchableOpacity>
+                : <TouchableOpacity onPress={() => navigation.navigate('Camera', { page: 'newForm' })}>
+                  <Block
+                    middle style={styles.blockImageEmpty}
+                  >
+                    <Text style={styles.plusText}>+</Text>
+                    <Text style={styles.addImageText}>Add Image</Text>
+                  </Block>
+                  </TouchableOpacity>}
             </Block>
             <Block
-              middle style={{
-                width: 320,
-                paddingBottom: 10,
-                borderBottomWidth: 0.5,
-                borderBottomColor: '#697177'
-              }}
+              middle style={styles.ratingBlock}
             >
-              <Text style={{
-                fontSize: 20,
-                color: '#001D4A'
-              }}
-              >Rating
-              </Text>
+              <Text style={styles.ratingTitle}>Rating</Text>
               <Block
-                row style={{
-                  padding: 10
-                }}
+                row style={styles.padding10}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Overall</Text>
+                <Text style={styles.ratingText}>Overall</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={0}
@@ -175,11 +179,9 @@ class NewReview extends Component {
                 />
               </Block>
               <Block
-                row style={{
-                  padding: 5
-                }}
+                row style={styles.padding5}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Price</Text>
+                <Text style={styles.ratingText}>Price</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={0}
@@ -194,11 +196,9 @@ class NewReview extends Component {
                 />
               </Block>
               <Block
-                row style={{
-                  padding: 5
-                }}
+                row style={styles.padding5}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Quality</Text>
+                <Text style={styles.ratingText}>Quality</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={0}
@@ -213,12 +213,9 @@ class NewReview extends Component {
                 />
               </Block>
               <Block
-                row style={{
-                  padding: 5,
-                  paddingBottom: 10
-                }}
+                row style={styles.ratingBottomBlock}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Cleanliness</Text>
+                <Text style={styles.ratingText}>Cleanliness</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={0}
@@ -234,47 +231,22 @@ class NewReview extends Component {
               </Block>
             </Block>
             <Block
-              middle style={{
-                width: 320,
-                padding: 10
-              }}
+              middle style={styles.reviewBlock}
             >
-              <Text style={{
-                fontSize: 20,
-                color: '#001D4A',
-                paddingBottom: 10
-              }}
-              >Review
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                color: '#697177',
-                paddingBottom: 10,
-                textAlign: 'center'
-              }}
-              >Please comment on your overall experience at {location}, {town}.
-              </Text>
+              <Text style={styles.reviewTitle}>Review</Text>
+              <Text style={styles.reviewSubTitle}>Please comment on your overall experience at {location}, {town}.</Text>
               <Input
                 rounded
-                style={{
-                  borderColor: '#7B8CDE',
-                  borderWidth: 2,
-                  backgroundColor: '#F2F2F2',
-                  elevation: 3,
-                  height: 80
-                }}
+                style={styles.reviewInput}
                 placeholderTextColor='#001D4A'
                 onChangeText={(reviewBody) => this.setState({ reviewBody })}
-                value={this.state.review_body}
+                value={this.state.reviewBody}
               />
               <Button
                 round
                 size='small'
                 color='#FE5F55'
-                style={{
-                  elevation: 5,
-                  marginTop: 20
-                }}
+                style={styles.reviewBtn}
                 onPress={() => this.addReview()}
               >
                 Post Review

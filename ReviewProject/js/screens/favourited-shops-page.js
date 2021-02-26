@@ -1,13 +1,14 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { Component } from 'react'
-import { Container, Content, CardItem, Thumbnail, Text, Left, Body, Right, View } from 'native-base'
-import { Image, Alert, ActivityIndicator } from 'react-native'
-import styles from '../styling/stylesheet'
+import { Image, ActivityIndicator, Text } from 'react-native'
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler'
-import { FloatingAction } from 'react-native-floating-action'
-import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
+import { Block, Button, Icon } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
+import Geolocation from 'react-native-geolocation-service'
+import haversine from 'haversine'
+import userFetch from '../api/user'
+import styles from '../styling/stylesheet'
 
 class FavouriteShops extends Component {
   constructor (props) {
@@ -15,7 +16,8 @@ class FavouriteShops extends Component {
     this.state = {
       isLoading: true,
       noData: true,
-      favouriteShops: []
+      favouriteShops: [],
+      distances: {}
     }
   }
 
@@ -45,43 +47,30 @@ class FavouriteShops extends Component {
   }
 
   async getFavourites () {
-    const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
-    const id = await AsyncStorage.getItem('@id')
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      }
+    const favouriteShops = await userFetch.getUserDetails()
+    this.setState({ favouriteShops: favouriteShops }, () => {
+      this.hasData()
+      this.getDistance()
+      this.setState({ isLoading: false })
     })
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('user favourites fetch successful')
-          return response.json()
-        } else if (response.status === 401) {
-          Alert.alert('Please login to use this feature')
-          navigation.navigate('Login')
-          console.log('user favourites fetch failed - unauthorized')
-        } else if (response.status === 404) {
-          Alert.alert('Please create an account')
-          navigation.navigate('Sign Up')
-          console.log('user favourites fetch failed - user not found')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('user favourites fetch failed - server error')
-        }
-      })
-      .then((Json) => {
-        this.setState({
-          favouriteShops: Json,
-          isLoading: false
-        }, () => {
-          this.hasData()
+  }
+
+  getDistance () {
+    const { favouriteShops } = this.state
+    Geolocation.getCurrentPosition(
+      async (position) => {
+        const start = { latitude: position.coords.latitude, longitude: position.coords.longitude }
+        favouriteShops.favourite_locations.forEach(item => {
+          const end = { latitude: item.latitude, longitude: item.longitude }
+          const distance = Math.round(haversine(start, end))
+          this.setState({ distances: { location: item.location_id, distance: distance } })
         })
-      })
-      .catch((error) => {
+      },
+      (error) => {
         console.log(error)
-      })
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    )
   }
 
   hasData () {
@@ -94,7 +83,7 @@ class FavouriteShops extends Component {
 
   render () {
     const navigation = this.props.navigation
-    const { isLoading, noData, favouriteShops } = this.state
+    const { isLoading, noData, favouriteShops, distances } = this.state
 
     console.log('DATA - ' + noData)
 
@@ -120,11 +109,7 @@ class FavouriteShops extends Component {
       return (
         <Block
           middle
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          style={styles.mainContainer}
         >
           <ActivityIndicator size='large' color='#7B8CDE' />
         </Block>
@@ -133,69 +118,53 @@ class FavouriteShops extends Component {
     return (
       <Block>
         <ScrollView>
-          <Block middle style={{ paddingTop: 20 }}>
+          <Block middle style={styles.pTop20}>
             <Image
-              style={{ width: 90, height: 90 }}
+              style={styles.largeHeaderIcon}
               source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1613925092/MobileApp/favourite_rukpvg.png' }}
             />
           </Block>
           {noData
-            ? <Block middle style={{ paddingTop: 20 }}>
-              <Text style={{ textAlign: 'center', color: '#000000' }}>You have not favourited any Coffee Shops.</Text>
+            ? <Block middle style={styles.pTop20}>
+              <Text style={styles.noDataText}>You have not favourited any Coffee Shops.</Text>
               <Button
                 round
                 size='small'
                 color='#7B8CDE'
-                style={{
-                  elevation: 4,
-                  marginTop: 20
-                }}
+                style={styles.mainBtn}
                 onPress={() => navigation.navigate('Home')}
               >
                 Go Home
               </Button>
-              </Block>
+            </Block>
             : <Block />}
           {favouriteShops && favouriteShops.favourite_locations && favouriteShops.favourite_locations.map((data, index) => (
             <Block
               key={index}
-              center card shadow space='between' style={{
-                flexDirection: 'column',
-                borderColor: 'transparent',
-                marginHorizontal: 20,
-                marginVertical: 12,
-                paddingBottom: 16,
-                backgroundColor: '#FFFFFF',
-                shadowOpacity: 0.40,
-                elevation: 4
-              }}
+              center card shadow space='between' style={styles.favouriteCard}
             >
-              <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri })}>
+              <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri, distance: distances.distance })}>
                 <Block>
                   <Block
                     row
                     center
-                    style={{
-                      marginBottom: 10
-                    }}
+                    style={styles.mBottom10}
                   >
                     <Image
-                      style={{ width: 370, height: 190, borderTopLeftRadius: 3, borderTopRightRadius: 3 }}
+                      style={styles.cardImage}
                       source={{ uri: imagePaths[index].uri }}
                     />
                   </Block>
                   <Block
                     row
                     center
-                    style={{
-                      paddingHorizontal: 15
-                    }}
+                    style={styles.pHorizontal15}
                   >
                     <Image
-                      style={{ width: 60, height: 60 }}
+                      style={styles.thumbnail}
                       source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612974814/MobileApp/restaurant_zusegh.png' }}
                     />
-                    <Block flex style={{ paddingLeft: 15 }}>
+                    <Block flex style={styles.pLeft15}>
                       <AirbnbRating
                         count={5}
                         defaultRating={data.avg_overall_rating}
@@ -208,13 +177,13 @@ class FavouriteShops extends Component {
                           alignSelf: 'flex-start'
                         }}
                       />
-                      <Text style={{ fontSize: 19 }}>{data.location_name}</Text>
-                      <Text style={{ fontSize: 15, color: '#697177' }}>{data.location_town}</Text>
+                      <Text style={styles.text19}>{data.location_name}</Text>
+                      <Text style={styles.favouriteCardText}>{data.location_town}</Text>
 
                     </Block>
                     <Block row>
                       <Icon size={18} name='enviroment' family='AntDesign' color='#7B8CDE' />
-                      <Text style={{ paddingLeft: 6, fontSize: 13, color: '#7B8CDE' }}>{data.latitude} miles away</Text>
+                      <Text style={styles.distanceText}>{distances.distance} Km</Text>
                     </Block>
                   </Block>
                 </Block>

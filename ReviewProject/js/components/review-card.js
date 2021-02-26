@@ -1,15 +1,21 @@
 import React, { Component } from 'react'
-import { View, Text, ActivityIndicator, ScrollView, Image, ToastAndroid, Alert } from 'react-native'
-import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Text, ActivityIndicator, ScrollView, Image, Alert } from 'react-native'
+import { Block, Button, Icon, Input } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { CheckBox } from 'native-base'
+import userFetch from '../api/user'
+import reviewFetch from '../api/review'
+import likeFetch from '../api/likes'
+import photoFetch from '../api/photo'
+import profFilter from '../components/profanity-filter.json'
+import styles from '../styling/stylesheet'
 
 class Review extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      profFilter: profFilter.profWords,
+      block: false,
       reviewID: '',
       overall: '',
       price: '',
@@ -23,41 +29,107 @@ class Review extends Component {
       isLoading: true,
       isMyReview: false,
       isLiked: false,
+      hasPhoto: false,
       overallRating: 0,
       priceRating: 0,
       qualityRating: 0,
       clenlinessRating: 0,
-      reviewBody: ''
+      reviewBody: '',
+      photo: '',
+      base64Img: ''
     }
   }
 
   async componentDidMount () {
-    this.setState({ isLoading: true })
-    this.setState({ isMyReview: false })
-    this.setState({ isLiked: false })
-    const { route } = this.props
-    const { reviewID, overall, price, quality, cleanliness, body, locID, location, town } = route.params
-    this.setState({ reviewID: reviewID })
-    this.setState({ overall: overall })
-    this.setState({ price: price })
-    this.setState({ quality: quality })
-    this.setState({ cleanliness: cleanliness })
-    this.setState({ body: body })
-    this.setState({ locID: locID })
-    this.setState({ location: location })
-    this.setState({ town: town })
+    const { navigation, route } = this.props
+    const { reviewID, overall, price, quality, cleanliness, body, locID, location, town, photo } = route.params
+    this.setState({ block: false })
+    this.unmount = navigation.addListener('focus', () => {
+      this.componentDidMount()
+    })
+    if (photo !== null) {
+      console.log('Photo found')
+      this.setState({ isLoading: true, photo: photo }, () => {
+        this.setPhoto(photo)
+      })
+    }
+    if (photo === null) {
+      console.log('No photo')
+      this.setState({
+        isLoading: true,
+        isMyReview: false,
+        isLiked: false,
+        hasPhoto: false,
+        reviewID: reviewID,
+        overall: overall,
+        price: price,
+        quality: quality,
+        cleanliness: cleanliness,
+        body: body,
+        locID: locID,
+        location: location,
+        town: town
+      }, () => {
+        this.getUserDetails()
+      })
+    }
+  }
 
-    this.getUserDetails()
+  componentWillUnmount () {
+    this.unmount()
+  }
+
+  setPhoto (photo) {
+    const base64img = 'data:image/jpeg;base64,' + photo.base64
+    this.setState({ hasPhoto: true, base64Img: base64img }, () => {
+      this.setState({ isLoading: false })
+    })
+  }
+
+  async getUserDetails () {
+    const userData = await userFetch.getUserDetails()
+    this.setState({ userData: userData }, () => {
+      this.compareIDs()
+    })
+  }
+
+  compareIDs () {
+    const { userData, reviewID } = this.state
+    userData && userData.reviews.map((data, index) => (
+      this.isMyReview(data, reviewID)
+    ))
+    userData && userData.liked_reviews.map((data, index) => (
+      this.isLiked(data, reviewID)
+    ))
+    this.checkForPhoto()
+  }
+
+  isMyReview (data, reviewID) {
+    if (data.review.review_id === reviewID) {
+      this.setState({ isMyReview: true })
+    }
+  }
+
+  isLiked (data, reviewID) {
+    if (data.review.review_id === reviewID) {
+      this.setState({ isLiked: true })
+    }
+  }
+
+  async checkForPhoto () {
+    const { locID, reviewID } = this.state
+    let photo = await photoFetch.checkForPhoto(locID, reviewID)
+    if (photo !== null) {
+      photo = 'data:image/jpeg;base64,' + photo
+      this.setState({ base64Img: photo, hasPhoto: true })
+    }
+    this.setState({ isLoading: false })
   }
 
   async updateReview () {
-    this.setState({ isLoading: true })
-    const { locID, reviewID } = this.state
-    const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
+    const { hasPhoto, locID, reviewID, overall, price, quality, cleanliness, body, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody } = this.state
 
     const toSend = {}
-    const { overall, price, quality, cleanliness, body, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody } = this.state
 
     if (overallRating !== overall && overallRating !== 0) {
       toSend.overall_rating = overallRating
@@ -75,213 +147,93 @@ class Review extends Component {
       toSend.review_body = reviewBody
     }
 
-    return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locID + '/review/' + reviewID, {
-      method: 'patch',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      },
-      body: JSON.stringify(toSend)
+    await this.filter(reviewBody)
+    if (this.state.block === true) {
+      Alert.alert('Please refrain from mentioning any food/beverages other than coffee.')
+      this.setState({ isLoading: false })
+    }
+    if (this.state.block === false) {
+      const status = await reviewFetch.updateReview(locID, reviewID, toSend)
+      if (hasPhoto) {
+        this.updatePhoto()
+      }
+      this.handleReviewStatus(status)
+    }
+  }
+
+  filter (reviewBody) {
+    const profFilter = this.state.profFilter
+    profFilter.forEach(word => {
+      if (reviewBody.includes(word)) {
+        this.setState({ block: true })
+      }
     })
-      .then((response) => {
-        if (response.status === 200) {
-          ToastAndroid.show('Review Updated Successfully', ToastAndroid.SHORT)
-          console.log('review update successful')
-          navigation.navigate('Home')
-        } else if (response.status === 400) {
-          Alert.alert('Please edit the review before updating.')
-          console.log('review update failed - bad request')
-        } else if (response.status === 401) {
-          Alert.alert('Please login to use this feature')
-          navigation.navigate('Login')
-          console.log('review update failed - unauthorized')
-        } else if (response.status === 403) {
-          Alert.alert('Something went wrong. Please close the app and try again.')
-          console.log('review update failed - forbidden')
-        } else if (response.status === 404) {
-          Alert.alert('Apologies we cannot find your review details. Please log out and log back in.')
-          navigation.navigate('Logout')
-          console.log('review update failed - not found')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('review update failed - server error')
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+  }
+
+  async updatePhoto () {
+    const navigation = this.props.navigation
+    const { locID, reviewID, photo } = this.state
+    const status = photoFetch.postPhoto(locID, reviewID, photo)
+    if (status === 401) {
+      navigation.navigate('Login')
+    }
   }
 
   async deleteReview () {
     const { locID, reviewID } = this.state
-    const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
-
-    return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locID + '/review/' + reviewID, {
-      method: 'delete',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      }
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          ToastAndroid.show('Review Deleted', ToastAndroid.SHORT)
-          console.log('delete review successful')
-          navigation.navigate('Home')
-        } else if (response.status === 400) {
-          Alert.alert('Something went wrong. Please close the app and try again.')
-          console.log('delete review failed - bad request')
-        } else if (response.status === 401) {
-          Alert.alert('Please login to use this feature')
-          navigation.navigate('Login')
-          console.log('delete review failed - unauthorized')
-        } else if (response.status === 403) {
-          Alert.alert('Something went wrong. Please close the app and try again.')
-          console.log('delete review failed - forbidden')
-        } else if (response.status === 404) {
-          Alert.alert('Apologies we cannot find this review in our system. Please log out and log back in.')
-          navigation.navigate('Logout')
-          console.log('delete review failed - not found')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('delete review failed - server error')
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+    const status = await reviewFetch.deleteReview(locID, reviewID)
+    this.handleReviewStatus(status)
   }
 
-  async getUserDetails () {
-    const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
-    const id = await AsyncStorage.getItem('@id')
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Authorization': token
-      }
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('user fetch successful')
-          return response.json()
-        } else if (response.status === 401) {
-          Alert.alert('Please login to use this feature')
-          navigation.navigate('Login')
-          console.log('user fetch failed - unauthorized')
-        } else if (response.status === 404) {
-          Alert.alert('Please create an account')
-          navigation.navigate('Sign Up')
-          console.log('user fetch failed - user not found')
-        } else {
-          Alert.alert('Something went wrong. Please try again.')
-          console.log('user fetch failed - server error')
-        }
+  async deletePhoto () {
+    const { locID, reviewID } = this.state
+    this.setState({ isLoading: true })
+    const status = await photoFetch.deletePhoto(locID, reviewID)
+    if (status === 200) {
+      this.setState({ hasPhoto: false }, () => {
+        this.setState({ isLoading: false })
       })
-      .then((Json) => {
-        this.setState({ userData: Json })
-        this.compareIDs()
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+    }
   }
 
   async handleLikes () {
     const { locID, reviewID, isLiked } = this.state
-    const navigation = this.props.navigation
-    const token = await AsyncStorage.getItem('@token')
     if (isLiked) {
-      return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locID + '/review/' + reviewID + '/like', {
-        method: 'delete',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': token
-        }
-      })
-        .then((response) => {
-          if (response.status === 200) {
-            ToastAndroid.show('Review unliked', ToastAndroid.SHORT)
-            this.setState({ isLiked: false })
-            this.getUserDetails()
-            console.log('unlike review successful')
-          } else if (response.status === 401) {
-            Alert.alert('Please login to use this feature')
-            navigation.navigate('Login')
-            console.log('unlike review failed - unauthorised')
-          } else if (response.status === 403) {
-            Alert.alert('Something went wrong. Please close the app and try again.')
-            console.log('unlike review failed - bad request')
-          } else if (response.status === 404) {
-            Alert.alert('Apologies we cannot unlike this review. Please log out and log back in.')
-            navigation.navigate('Logout')
-            console.log('unlike review failed - not found')
-          } else {
-            Alert.alert('Something went wrong. Please try again.')
-            console.log('unlike review failed - server error')
-          }
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+      const status = await likeFetch.unlikeReview(locID, reviewID)
+      const liked = false
+      this.handleLikeStatus(status, liked)
     } else {
-      return fetch('http://10.0.2.2:3333/api/1.0.0/location/' + locID + '/review/' + reviewID + '/like', {
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': token
-        }
+      const status = await likeFetch.likeReview(locID, reviewID)
+      const liked = true
+      this.handleLikeStatus(status, liked)
+    }
+  }
+
+  handleReviewStatus (status) {
+    const navigation = this.props.navigation
+    if (status === 200) {
+      navigation.navigate('My Reviews')
+    }
+    if (status === 401) {
+      navigation.navigate('Login')
+    }
+    if (status === 404) {
+      navigation.navigate('Logout')
+    }
+  }
+
+  handleLikeStatus (status, liked) {
+    const navigation = this.props.navigation
+    if (status === 200) {
+      this.setState({ isLiked: liked }, () => {
+        this.getUserDetails()
       })
-        .then((response) => {
-          if (response.status === 200) {
-            ToastAndroid.show('Review liked', ToastAndroid.SHORT)
-            this.setState({ isLiked: true })
-            this.getUserDetails()
-            console.log('like review successful')
-          } else if (response.status === 400) {
-            Alert.alert('Something went wrong. Please close the app and try again.')
-            console.log('like review failed - bad request')
-          } else if (response.status === 401) {
-            Alert.alert('Please login to use this feature')
-            navigation.navigate('Login')
-            console.log('like review failed - unauthorised')
-          } else if (response.status === 404) {
-            Alert.alert('Apologies we cannot like this review. Please log out and log back in.')
-            navigation.navigate('Logout')
-            console.log('like review failed - not found')
-          } else {
-            Alert.alert('Something went wrong. Please try again.')
-            console.log('shop fetch failed - server error')
-          }
-        })
-        .catch((error) => {
-          console.log(error)
-        })
     }
-  }
-
-  compareIDs () {
-    const { userData, reviewID } = this.state
-    userData && userData.reviews.map((data, index) => (
-      this.isMyReview(data, reviewID)
-    ))
-    userData && userData.liked_reviews.map((data, index) => (
-      this.isLiked(data, reviewID)
-    ))
-    this.setState({ isLoading: false })
-  }
-
-  isMyReview (data, reviewID) {
-    if (data.review.review_id === reviewID) {
-      this.setState({ isMyReview: true })
+    if (status === 401) {
+      navigation.navigate('Login')
     }
-  }
-
-  isLiked (data, reviewID) {
-    if (data.review.review_id === reviewID) {
-      this.setState({ isLiked: true })
+    if (status === 404) {
+      navigation.navigate('Logout')
     }
   }
 
@@ -304,17 +256,14 @@ class Review extends Component {
   }
 
   render () {
-    const { isLoading, isMyReview, isLiked, overall, price, quality, cleanliness, body, location, town } = this.state
+    const navigation = this.props.navigation
+    const { isLoading, isMyReview, isLiked, hasPhoto, overall, price, quality, cleanliness, body, location, town, photo, base64Img } = this.state
 
     if (isLoading) {
       return (
         <Block
           middle
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          style={styles.mainContainer}
         >
           <ActivityIndicator size='large' color='#7B8CDE' />
         </Block>
@@ -325,72 +274,57 @@ class Review extends Component {
         <ScrollView>
           <Block
             middle
-            style={{
-              margin: 15
-            }}
+            style={styles.margin15}
           >
             {isMyReview
               ? <Block
                   row
                   middle
-                  style={{
-                    width: 320,
-                    margin: 10,
-                    paddingBottom: 20,
-                    borderBottomWidth: 0.5,
-                    borderBottomColor: '#697177'
-                  }}
+                  style={styles.myReviewContainer}
                 >
                 <Block
                   middle
-                  style={{
-                    paddingRight: 50
-                  }}
+                  style={styles.pRight50}
                 >
-                  <Text style={{
-                    fontSize: 25,
-                    color: '#001D4A'
-                  }}
-                  >{location}
-                  </Text>
-                  <Text style={{ fontSize: 18, color: '#697177', paddingBottom: 5 }}>{town}</Text>
+                  <Text style={styles.locationNameText}>{location}</Text>
+                  <Text style={styles.locationTownText}>{town}</Text>
                   <TouchableOpacity onPress={() => this.handleLikes()}>
                     {isLiked
                       ? <Icon size={30} name='heart' family='AntDesign' color='#FE5F55' />
                       : <Icon size={30} name='hearto' family='AntDesign' color='#FE5F55' />}
                   </TouchableOpacity>
                 </Block>
-                <TouchableOpacity>
-                  <Block
-                    middle style={{
-                      width: 130,
-                      height: 100,
-                      borderWidth: 1,
-                      borderColor: '#7B8CDE'
-                    }}
-                  >
-                    <Text style={{ fontSize: 20, color: '#7B8CDE' }}>+</Text>
-                    <Text style={{ fontSize: 14, color: '#7B8CDE' }}>Add Image</Text>
-                  </Block>
-                </TouchableOpacity>
+                {hasPhoto
+                  ? <Block row bottom>
+                    <Image
+                      style={styles.blockImage}
+                      source={{ uri: base64Img }}
+                    />
+                    <TouchableOpacity onPress={() => this.deletePhoto()}>
+                      <Icon size={22} name='delete' family='AntDesign' color='#FE5F55' />
+                    </TouchableOpacity>
+                    </Block>
+                  : <TouchableOpacity onPress={() => navigation.navigate('Camera', { page: 'currentReview' })}>
+                    <Block
+                      middle style={styles.blockImageEmpty}
+                    >
+                      <Text style={styles.plusText}>+</Text>
+                      <Text style={styles.addImageText}>Add Image</Text>
+                    </Block>
+                  </TouchableOpacity>}
                 </Block>
               : <Block
                   middle
-                  style={{
-                    width: 320,
-                    margin: 10,
-                    paddingBottom: 20,
-                    borderBottomWidth: 0.5,
-                    borderBottomColor: '#697177'
-                  }}
+                  style={styles.myReviewContainer}
                 >
-                <Text style={{
-                  fontSize: 25,
-                  color: '#001D4A'
-                }}
-                >{location}
-                </Text>
-                <Text style={{ fontSize: 18, color: '#697177', paddingBottom: 5 }}>{town}</Text>
+                {hasPhoto
+                  ? <Image
+                      style={styles.bannerImage}
+                      source={{ uri: base64Img }}
+                    />
+                  : <Block />}
+                <Text style={styles.myReviewImageText}>{location}</Text>
+                <Text style={styles.locationTownText}>{town}</Text>
                 <TouchableOpacity onPress={() => this.handleLikes()}>
                   {isLiked
                     ? <Icon size={30} name='heart' family='AntDesign' color='#FE5F55' />
@@ -398,25 +332,13 @@ class Review extends Component {
                 </TouchableOpacity>
                 </Block>}
             <Block
-              middle style={{
-                width: 320,
-                paddingBottom: 10,
-                borderBottomWidth: 0.5,
-                borderBottomColor: '#697177'
-              }}
+              middle style={styles.ratingBlock}
             >
-              <Text style={{
-                fontSize: 20,
-                color: '#001D4A'
-              }}
-              >Rating
-              </Text>
+              <Text style={styles.ratingTitle}>Rating</Text>
               <Block
-                row style={{
-                  padding: 10
-                }}
+                row style={styles.padding10}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Overall</Text>
+                <Text style={styles.ratingText}>Overall</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={overall}
@@ -432,11 +354,9 @@ class Review extends Component {
                 />
               </Block>
               <Block
-                row style={{
-                  padding: 5
-                }}
+                row style={styles.padding5}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Price</Text>
+                <Text style={styles.ratingText}>Price</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={price}
@@ -452,11 +372,9 @@ class Review extends Component {
                 />
               </Block>
               <Block
-                row style={{
-                  padding: 5
-                }}
+                row style={styles.padding5}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Quality</Text>
+                <Text style={styles.ratingText}>Quality</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={quality}
@@ -472,12 +390,9 @@ class Review extends Component {
                 />
               </Block>
               <Block
-                row style={{
-                  padding: 5,
-                  paddingBottom: 10
-                }}
+                row style={styles.ratingBottomBlock}
               >
-                <Text style={{ fontSize: 16, paddingRight: 6 }}>Cleanliness</Text>
+                <Text style={styles.ratingText}>Cleanliness</Text>
                 <AirbnbRating
                   count={5}
                   defaultRating={cleanliness}
@@ -494,38 +409,16 @@ class Review extends Component {
               </Block>
             </Block>
             <Block
-              middle style={{
-                width: 320,
-                padding: 10
-              }}
+              middle style={styles.reviewBlock}
             >
-              <Text style={{
-                fontSize: 20,
-                color: '#001D4A',
-                paddingBottom: 10
-              }}
-              >Review
-              </Text>
+              <Text style={styles.reviewTitle}>Review</Text>
               {isMyReview
                 ? <Block>
-                  <Text style={{
-                    fontSize: 14,
-                    color: '#697177',
-                    paddingBottom: 10,
-                    textAlign: 'center'
-                  }}
-                  >Please comment on your overall experience at {location}, {town}.
-                  </Text>
+                  <Text style={styles.reviewSubTitle}>Please comment on your overall experience at {location}, {town}.</Text>
                   <Input
                     rounded
                     placeholder={body}
-                    style={{
-                      borderColor: '#7B8CDE',
-                      borderWidth: 2,
-                      backgroundColor: '#F2F2F2',
-                      elevation: 3,
-                      height: 80
-                    }}
+                    style={styles.reviewInput}
                     placeholderTextColor='#001D4A'
                     onChangeText={(reviewBody) => this.setState({ reviewBody })}
                     value={this.state.review_body}
@@ -535,10 +428,7 @@ class Review extends Component {
                       round
                       size='small'
                       color='#FE5F55'
-                      style={{
-                        elevation: 5,
-                        marginTop: 20
-                      }}
+                      style={styles.reviewBtn}
                       onPress={() => this.updateReview()}
                     >
                       Update Review
@@ -548,14 +438,7 @@ class Review extends Component {
                     </TouchableOpacity>
                   </Block>
                   </Block>
-                : <Text style={{
-                  fontSize: 14,
-                  color: '#697177',
-                  paddingBottom: 10,
-                  textAlign: 'center'
-                }}
-                  >"{body}"
-                  </Text>}
+                : <Text style={styles.reviewSubTitle}>"{body}"</Text>}
             </Block>
           </Block>
         </ScrollView>

@@ -1,7 +1,6 @@
-import React, { Component } from 'react'
-import { View, Text, Alert, TouchableOpacity, Image, ActivityIndicator } from 'react-native'
+import { Component } from 'react'
+import { Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import styles from '../styling/stylesheet'
 
 class SearchQuery extends Component {
   constructor (props) {
@@ -40,6 +39,11 @@ class SearchQuery extends Component {
     const queryStr = this.buildQuery(toSend)
     const results = await this.search(queryStr)
 
+    return results
+  }
+
+  async getAll () {
+    const results = await this.search('')
     return results
   }
 

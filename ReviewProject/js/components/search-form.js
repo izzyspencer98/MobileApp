@@ -1,18 +1,19 @@
 import React, { Component } from 'react'
-import { View, Text, Alert, TouchableOpacity, Image, ActivityIndicator } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import styles from '../styling/stylesheet'
-import { Container } from 'native-base'
-import { Block, Button, Card, NavBar, Input, Radio, Icon } from 'galio-framework'
+import { Text, TouchableOpacity, Image } from 'react-native'
+import { Block, Button, Input, Radio, Icon } from 'galio-framework'
 import { ScrollView } from 'react-native-gesture-handler'
 import { AirbnbRating } from 'react-native-ratings'
+import Geolocation from 'react-native-geolocation-service'
+import haversine from 'haversine'
 import search from '../api/search'
+import styles from '../styling/stylesheet'
 
 class Search extends Component {
   constructor (props) {
     super(props)
     this.state = {
       searchResults: [],
+      distances: {},
       shopName: '',
       overallRating: 0,
       priceRating: 0,
@@ -27,10 +28,12 @@ class Search extends Component {
   }
 
   componentDidMount () {
-    this.setState({ radio1: false })
-    this.setState({ radio2: false })
-    this.setState({ searchResults: [] })
-    this.setState({ offset: 0 })
+    this.setState({
+      radio1: false,
+      radio2: false,
+      searchResults: [],
+      offset: 0
+    })
   }
 
   handleRadio1 () {
@@ -81,25 +84,48 @@ class Search extends Component {
     const { shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset } = this.state
 
     const results = await search.findLocations(shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset)
-    this.setState({ searchResults: results })
-    console.log('RESULTS - ' + JSON.stringify(this.state.searchResults))
+    this.setState({ searchResults: results }, () => {
+      this.getDistance()
+    })
   }
 
   async handleBack () {
     const { shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset } = this.state
     const results = await search.findLocations(shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset)
-    this.setState({ searchResults: results })
+    this.setState({ searchResults: results }, () => {
+      this.getDistance()
+    })
   }
 
   async handleNext () {
     const { shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset } = this.state
     const results = await search.findLocations(shopName, overallRating, priceRating, qualityRating, clenlinessRating, favourites, myReviews, offset)
-    this.setState({ searchResults: results })
+    this.setState({ searchResults: results }, () => {
+      this.getDistance()
+    })
+  }
+
+  getDistance () {
+    const { searchResults } = this.state
+    if (searchResults.length > 0) {
+      Geolocation.getCurrentPosition(
+        async (position) => {
+          const start = { latitude: position.coords.latitude, longitude: position.coords.longitude }
+          const end = { latitude: searchResults[0].latitude, longitude: searchResults[0].longitude }
+          const distance = Math.round(haversine(start, end))
+          this.setState({ distances: { location: searchResults[0].location_id, distance: distance } })
+        },
+        (error) => {
+          console.log(error)
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      )
+    }
   }
 
   render () {
     const navigation = this.props.navigation
-    const { searchResults } = this.state
+    const { searchResults, distances } = this.state
 
     const imagePaths = [
       {
@@ -124,20 +150,12 @@ class Search extends Component {
         <ScrollView>
           <Block
             middle
-            style={{
-              marginHorizontal: 40,
-              marginTop: 5
-            }}
+            style={styles.searchContainer}
           >
             <Input
               rounded
               placeholder='Shop Name'
-              style={{
-                borderColor: '#7B8CDE',
-                borderWidth: 2,
-                backgroundColor: '#F2F2F2',
-                elevation: 3
-              }}
+              style={styles.textInput}
               icon='search1'
               family='antdesign'
               iconColor='#001D4A'
@@ -146,18 +164,9 @@ class Search extends Component {
               onChangeText={(shopName) => this.setState({ shopName })}
               value={this.state.shopName}
             />
-            <Text style={{
-              fontSize: 17,
-              color: '#001D4A',
-              paddingTop: 10,
-              paddingBottom: 5
-            }}
-            >Minimum Ratings
-            </Text>
-            <Block
-              row
-            >
-              <Text style={{ fontSize: 16, paddingRight: 6 }}>Overall</Text>
+            <Text style={styles.searchRatingsText}>Minimum Ratings</Text>
+            <Block row>
+              <Text style={styles.ratingText}>Overall</Text>
               <AirbnbRating
                 count={5}
                 defaultRating={0}
@@ -171,10 +180,8 @@ class Search extends Component {
                 onFinishRating={(overallRating) => this.setState({ overallRating })}
               />
             </Block>
-            <Block
-              row
-            >
-              <Text style={{ fontSize: 16, paddingRight: 6 }}>Price</Text>
+            <Block row>
+              <Text style={styles.ratingText}>Price</Text>
               <AirbnbRating
                 count={5}
                 defaultRating={0}
@@ -188,10 +195,8 @@ class Search extends Component {
                 onFinishRating={(priceRating) => this.setState({ priceRating })}
               />
             </Block>
-            <Block
-              row
-            >
-              <Text style={{ fontSize: 16, paddingRight: 6 }}>Quality</Text>
+            <Block row>
+              <Text style={styles.ratingText}>Quality</Text>
               <AirbnbRating
                 count={5}
                 defaultRating={0}
@@ -206,11 +211,9 @@ class Search extends Component {
               />
             </Block>
             <Block
-              row style={{
-                paddingBottom: 5
-              }}
+              row style={styles.pBottom5}
             >
-              <Text style={{ fontSize: 16, paddingRight: 6 }}>Cleanliness</Text>
+              <Text style={styles.ratingText}>Cleanliness</Text>
               <AirbnbRating
                 count={5}
                 defaultRating={0}
@@ -224,19 +227,13 @@ class Search extends Component {
                 onFinishRating={(clenlinessRating) => this.setState({ clenlinessRating })}
               />
             </Block>
-            <Block middle style={{ paddingTop: 5 }}>
-              <Text style={{
-                fontSize: 15,
-                marginBottom: 5,
-                textAlign: 'center'
-              }}
-              >Search Only:
-              </Text>
-              <Block row style={{ paddingBottom: 10 }}>
-                <Block style={{ paddingRight: 15 }}>
+            <Block middle style={styles.pTop5}>
+              <Text style={styles.searchOnlyText}>Search Only:</Text>
+              <Block row style={styles.pBottom10}>
+                <Block style={styles.pRight15}>
                   <Radio label='Favourite Shops' color='#7B8CDE' onChange={() => this.handleRadio1()} />
                 </Block>
-                <Block style={{ paddingLeft: 15 }}>
+                <Block style={styles.pRight15}>
                   <Radio label='My Reviews' color='#7B8CDE' onChange={() => this.handleRadio2()} />
                 </Block>
               </Block>
@@ -245,9 +242,7 @@ class Search extends Component {
               round
               size='small'
               color='#7B8CDE'
-              style={{
-                elevation: 5
-              }}
+              style={styles.elevation4}
               onPress={() => this.resetSearch()}
             >
               Search
@@ -257,57 +252,44 @@ class Search extends Component {
             {searchResults && searchResults.map((data, index) => (
               <Block key={index}>
                 <Block row middle>
-                  <TouchableOpacity style={{ paddingRight: 120 }} onPress={() => this.resetBack()}>
+                  <TouchableOpacity style={styles.pRight120} onPress={() => this.resetBack()}>
                     <Image
-                      style={{ width: 30, height: 20 }}
+                      style={styles.paginationArrows}
                       source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1614009486/MobileApp/back_trl21g.png' }}
                     />
                   </TouchableOpacity>
-                  <TouchableOpacity style={{ paddingLeft: 120 }} onPress={() => this.resetNext()}>
+                  <TouchableOpacity style={styles.pLeft120} onPress={() => this.resetNext()}>
                     <Image
-                      style={{ width: 30, height: 20 }}
+                      style={styles.paginationArrows}
                       source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1614009489/MobileApp/next_jg0z6u.png' }}
                     />
                   </TouchableOpacity>
                 </Block>
                 <Block
-                  center card shadow space='between' style={{
-                    flexDirection: 'column',
-                    borderColor: 'transparent',
-                    marginHorizontal: 20,
-                    marginVertical: 12,
-                    paddingBottom: 16,
-                    backgroundColor: '#FFFFFF',
-                    shadowOpacity: 0.40,
-                    elevation: 4
-                  }}
+                  center card shadow space='between' style={styles.searchCardContainer}
                 >
-                  <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri })}>
+                  <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri, distance: distances.distance })}>
                     <Block>
                       <Block
                         row
                         center
-                        style={{
-                          marginBottom: 10
-                        }}
+                        style={styles.mBottom10}
                       >
                         <Image
-                          style={{ width: 370, height: 190, borderTopLeftRadius: 3, borderTopRightRadius: 3 }}
+                          style={styles.cardImage}
                           source={{ uri: imagePaths[index].uri }}
                         />
                       </Block>
                       <Block
                         row
                         center
-                        style={{
-                          paddingHorizontal: 15
-                        }}
+                        style={styles.pHorizontal15}
                       >
                         <Image
-                          style={{ width: 60, height: 60 }}
+                          style={styles.thumbnail}
                           source={{ uri: 'https://res.cloudinary.com/dk4rjadwm/image/upload/v1612974814/MobileApp/restaurant_zusegh.png' }}
                         />
-                        <Block flex style={{ paddingLeft: 15 }}>
+                        <Block flex style={styles.pLeft15}>
                           <AirbnbRating
                             count={5}
                             defaultRating={data.avg_overall_rating}
@@ -320,13 +302,13 @@ class Search extends Component {
                               alignSelf: 'flex-start'
                             }}
                           />
-                          <Text style={{ fontSize: 19 }}>{data.location_name}</Text>
-                          <Text style={{ fontSize: 15, color: '#697177' }}>{data.location_town}</Text>
+                          <Text style={styles.text19}>{data.location_name}</Text>
+                          <Text style={styles.searchCardText}>{data.location_town}</Text>
 
                         </Block>
                         <Block row>
                           <Icon size={18} name='enviroment' family='AntDesign' color='#7B8CDE' />
-                          <Text style={{ paddingLeft: 6, fontSize: 13, color: '#7B8CDE' }}>{data.latitude} miles away</Text>
+                          <Text style={styles.distanceText}>{distances.distance} Km</Text>
                         </Block>
                       </Block>
                     </Block>
