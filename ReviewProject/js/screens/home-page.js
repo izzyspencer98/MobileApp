@@ -2,18 +2,22 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { Component } from 'react'
 import { Container, Content, CardItem, Thumbnail, Text, Left, Body, Right, View } from 'native-base'
-import { Image, Alert, ActivityIndicator } from 'react-native'
+import { Image, Alert, ActivityIndicator, PermissionsAndroid } from 'react-native'
 import styles from '../styling/stylesheet'
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler'
 import { FloatingAction } from 'react-native-floating-action'
 import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
+import Geolocation from 'react-native-geolocation-service'
+import haversine from 'haversine'
 import search from '../api/search'
 
 class Home extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      hasPermission: false,
+      distances: {},
       isLoading: true,
       shopCardInfo: [],
       shopName: '',
@@ -42,7 +46,7 @@ class Home extends Component {
         shopCardInfo: [],
         isLoading: true
       }, () => {
-        this.getShopData()
+        this.requestLocationPermission()
       })
     }
   }
@@ -51,16 +55,67 @@ class Home extends Component {
     this.unmount()
   }
 
+  async requestLocationPermission () {
+    const hasPermission = this.state.hasPermission
+    if (!hasPermission) {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Allow CoffiDa to access your location?',
+            message: 'We need permission to access your location',
+            buttonNegative: 'No',
+            buttonPositive: 'OK'
+          }
+        )
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          this.setState({ hasPermission: true }, () => {
+            this.getShopData()
+          })
+        } else {
+          this.getShopData()
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    this.getShopData()
+  }
+
   async getShopData () {
     const data = await search.getAll()
     this.setState({ shopCardInfo: data }, () => {
+      this.getDistance()
       this.setState({ isLoading: false })
     })
   }
 
+  getDistance () {
+    const { hasPermission, shopCardInfo } = this.state
+    if (hasPermission) {
+      Geolocation.getCurrentPosition(
+        async (position) => {
+          const start = { latitude: position.coords.latitude, longitude: position.coords.longitude }
+          shopCardInfo.forEach(item => {
+            const end = { latitude: item.latitude, longitude: item.longitude }
+            const distance = Math.round(haversine(start, end))
+            this.setState({ distances: { location: item.location_id, distance: distance } })
+          })
+        },
+        (error) => {
+          console.log(error)
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      )
+    }
+    if (!hasPermission) {
+      // no access to location
+    }
+  }
+
   render () {
     const navigation = this.props.navigation
-    const { isLoading, shopCardInfo } = this.state
+    const { isLoading, shopCardInfo, distances } = this.state
 
     const imagePaths = [
       {
@@ -141,7 +196,7 @@ class Home extends Component {
                 elevation: 4
               }}
             >
-              <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri })}>
+              <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri, distance: distances.distance })}>
                 <Block>
                   <Block
                     row
@@ -185,7 +240,7 @@ class Home extends Component {
                     </Block>
                     <Block row>
                       <Icon size={18} name='enviroment' family='AntDesign' color='#7B8CDE' />
-                      <Text style={{ paddingLeft: 6, fontSize: 13, color: '#7B8CDE' }}>{data.latitude} miles away</Text>
+                      <Text style={{ paddingLeft: 6, fontSize: 13, color: '#7B8CDE' }}>{distances.distance} Km</Text>
                     </Block>
                   </Block>
                 </Block>

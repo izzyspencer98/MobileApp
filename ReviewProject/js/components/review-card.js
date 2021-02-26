@@ -8,11 +8,14 @@ import userFetch from '../api/user'
 import reviewFetch from '../api/review'
 import likeFetch from '../api/likes'
 import photoFetch from '../api/photo'
+import profFilter from '../components/profanity-filter.json'
 
 class Review extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      profFilter: profFilter.profWords,
+      block: false,
       reviewID: '',
       overall: '',
       price: '',
@@ -40,6 +43,7 @@ class Review extends Component {
   async componentDidMount () {
     const { navigation, route } = this.props
     const { reviewID, overall, price, quality, cleanliness, body, locID, location, town, photo } = route.params
+    this.setState({ block: false })
     this.unmount = navigation.addListener('focus', () => {
       this.componentDidMount()
     })
@@ -143,11 +147,27 @@ class Review extends Component {
       toSend.review_body = reviewBody
     }
 
-    const status = await reviewFetch.updateReview(locID, reviewID, toSend)
-    if (hasPhoto) {
-      this.updatePhoto()
+    await this.filter(reviewBody)
+    if (this.state.block === true) {
+      Alert.alert('Please refrain from mentioning any food/beverages other than coffee.')
+      this.setState({ isLoading: false })
     }
-    this.handleReviewStatus(status)
+    if (this.state.block === false) {
+      const status = await reviewFetch.updateReview(locID, reviewID, toSend)
+      if (hasPhoto) {
+        this.updatePhoto()
+      }
+      this.handleReviewStatus(status)
+    }
+  }
+
+  filter (reviewBody) {
+    const profFilter = this.state.profFilter
+    profFilter.forEach(word => {
+      if (reviewBody.includes(word)) {
+        this.setState({ block: true })
+      }
+    })
   }
 
   async updatePhoto () {

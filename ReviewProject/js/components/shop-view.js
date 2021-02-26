@@ -6,6 +6,7 @@ import styles from '../styling/stylesheet'
 import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
 import { TouchableOpacity } from 'react-native-gesture-handler'
+import openMap from 'react-native-open-maps'
 import locationFetch from '../api/location'
 import favouriteFetch from '../api/favourites'
 import userFetch from '../api/user'
@@ -17,6 +18,7 @@ class Shop extends Component {
       isLoading: true,
       locID: '',
       path: '',
+      distance: 0,
       shopInfo: [],
       userDetails: [],
       isFavourited: false
@@ -25,12 +27,13 @@ class Shop extends Component {
 
   async componentDidMount () {
     const { route } = this.props
-    const { locID, path } = route.params
+    const { locID, path, distance } = route.params
     this.setState({
       isLoading: true,
       isFavourited: false,
       locID: locID,
-      path: path
+      path: path,
+      distance: distance
     }, () => {
       this.getShop()
     })
@@ -63,8 +66,6 @@ class Shop extends Component {
 
   getFavourite (data) {
     const { shopInfo } = this.state
-    console.log('USER FAVS - ' + data.location_id)
-    console.log('LOC ID - ' + shopInfo.location_id)
     const id = shopInfo.location_id
     if (data.location_id === id) {
       this.setState({ isFavourited: true }, () => {
@@ -89,8 +90,6 @@ class Shop extends Component {
   }
 
   handleStatus (status, favourite) {
-    console.log('STATUS = ' + status)
-    console.log('IS FAVOURITED? - ' + favourite)
     const navigation = this.props.navigation
     if (status === 200) {
       this.setState({ isFavourited: favourite }, () => {
@@ -105,9 +104,14 @@ class Shop extends Component {
     }
   }
 
+  openMaps () {
+    const shopInfo = this.state.shopInfo
+    openMap({ latitude: shopInfo.latitude, longitude: shopInfo.longitude, provider: 'google' })
+  }
+
   render () {
     const navigation = this.props.navigation
-    const { isLoading, path, shopInfo, isFavourited } = this.state
+    const { isLoading, path, distance, shopInfo, isFavourited } = this.state
 
     if (isLoading) {
       return (
@@ -160,16 +164,18 @@ class Shop extends Component {
                 </TouchableOpacity>
               </Block>
               <Text style={{ fontSize: 18, color: '#697177' }}>{shopInfo.location_town}</Text>
-              <Block
-                row
-                middle
-                style={{
-                  marginTop: 5
-                }}
-              >
-                <Icon size={18} name='enviroment' family='AntDesign' color='#697177' />
-                <Text style={{ paddingLeft: 4, fontSize: 14, color: '#697177' }}>{shopInfo.latitude} miles away</Text>
-              </Block>
+              <TouchableOpacity onPress={() => this.openMaps()}>
+                <Block
+                  row
+                  middle
+                  style={{
+                    marginTop: 5
+                  }}
+                >
+                  <Icon size={18} name='enviroment' family='AntDesign' color='#697177' />
+                  <Text style={{ paddingLeft: 4, fontSize: 14, color: '#697177' }}>{distance} Kilometers away</Text>
+                </Block>
+              </TouchableOpacity>
             </Block>
             <Block
               middle style={{

@@ -7,12 +7,13 @@ import { TouchableOpacity } from 'react-native-gesture-handler'
 import reviewFetch from '../api/review'
 import userFetch from '../api/user'
 import photoFetch from '../api/photo'
+import profFilter from '../components/profanity-filter.json'
 
 class NewReview extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      profFilter: ['cake', 'tea', 'pastry', 'biscuit'],
+      profFilter: profFilter.profWords,
       block: false,
       locID: '',
       location: '',
@@ -32,6 +33,7 @@ class NewReview extends Component {
   async componentDidMount () {
     const { navigation, route } = this.props
     const { locID, location, town, photo } = route.params
+    this.setState({ block: false })
     this.unmount = navigation.addListener('focus', () => {
       this.componentDidMount()
     })

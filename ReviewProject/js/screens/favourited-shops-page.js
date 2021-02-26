@@ -8,6 +8,8 @@ import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler'
 import { FloatingAction } from 'react-native-floating-action'
 import { Block, Button, Card, NavBar, Icon, Input } from 'galio-framework'
 import { AirbnbRating } from 'react-native-ratings'
+import Geolocation from 'react-native-geolocation-service'
+import haversine from 'haversine'
 import userFetch from '../api/user'
 
 class FavouriteShops extends Component {
@@ -16,7 +18,8 @@ class FavouriteShops extends Component {
     this.state = {
       isLoading: true,
       noData: true,
-      favouriteShops: []
+      favouriteShops: [],
+      distances: {}
     }
   }
 
@@ -47,9 +50,29 @@ class FavouriteShops extends Component {
 
   async getFavourites () {
     const favouriteShops = await userFetch.getUserDetails()
-    this.setState({ favouriteShops: favouriteShops, isLoading: false }, () => {
+    this.setState({ favouriteShops: favouriteShops }, () => {
       this.hasData()
+      this.getDistance()
+      this.setState({ isLoading: false })
     })
+  }
+
+  getDistance () {
+    const { favouriteShops } = this.state
+    Geolocation.getCurrentPosition(
+      async (position) => {
+        const start = { latitude: position.coords.latitude, longitude: position.coords.longitude }
+        favouriteShops.favourite_locations.forEach(item => {
+          const end = { latitude: item.latitude, longitude: item.longitude }
+          const distance = Math.round(haversine(start, end))
+          this.setState({ distances: { location: item.location_id, distance: distance } })
+        })
+      },
+      (error) => {
+        console.log(error)
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    )
   }
 
   hasData () {
@@ -62,7 +85,7 @@ class FavouriteShops extends Component {
 
   render () {
     const navigation = this.props.navigation
-    const { isLoading, noData, favouriteShops } = this.state
+    const { isLoading, noData, favouriteShops, distances } = this.state
 
     console.log('DATA - ' + noData)
 
@@ -122,7 +145,7 @@ class FavouriteShops extends Component {
               >
                 Go Home
               </Button>
-              </Block>
+            </Block>
             : <Block />}
           {favouriteShops && favouriteShops.favourite_locations && favouriteShops.favourite_locations.map((data, index) => (
             <Block
@@ -138,7 +161,7 @@ class FavouriteShops extends Component {
                 elevation: 4
               }}
             >
-              <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri })}>
+              <TouchableOpacity onPress={() => navigation.navigate('Shop', { locID: data.location_id, path: imagePaths[index].uri, distance: distances.distance })}>
                 <Block>
                   <Block
                     row
@@ -182,7 +205,7 @@ class FavouriteShops extends Component {
                     </Block>
                     <Block row>
                       <Icon size={18} name='enviroment' family='AntDesign' color='#7B8CDE' />
-                      <Text style={{ paddingLeft: 6, fontSize: 13, color: '#7B8CDE' }}>{data.latitude} miles away</Text>
+                      <Text style={{ paddingLeft: 6, fontSize: 13, color: '#7B8CDE' }}>{distances.distance} Km</Text>
                     </Block>
                   </Block>
                 </Block>

@@ -22,7 +22,6 @@ class PhotoFetch extends Component {
     })
       .then((response) => {
         if (response.status === 200) {
-          ToastAndroid.show('Photo Posted Successfully', ToastAndroid.SHORT)
           console.log('new photo successful')
         } else if (response.status === 400) {
           console.log('new photo failed - bad request')
@@ -53,7 +52,6 @@ class PhotoFetch extends Component {
     })
       .then((response) => {
         if (response.status === 200) {
-          ToastAndroid.show('Photo Found Successfully', ToastAndroid.SHORT)
           console.log('get photo successful')
           return response.json()
         } else if (response.status === 404) {
