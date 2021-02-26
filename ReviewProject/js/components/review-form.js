@@ -12,6 +12,8 @@ class NewReview extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      profFilter: ['cake', 'tea', 'pastry', 'biscuit'],
+      block: false,
       locID: '',
       location: '',
       town: '',
@@ -60,20 +62,36 @@ class NewReview extends Component {
   }
 
   async addReview () {
-    this.setState({ isLoading: true })
+    this.setState({ isLoading: true, block: false })
     const navigation = this.props.navigation
     const { locID, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody } = this.state
-    const response = await reviewFetch.addReview(locID, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody)
-    if (response === 201) {
-      this.addPhoto(locID, reviewBody)
-      navigation.navigate('Home')
+    await this.filter(reviewBody)
+    if (this.state.block === true) {
+      Alert.alert('Please refrain from mentioning any food/beverages other than coffee.')
+      this.setState({ isLoading: false })
     }
-    if (response === 401) {
-      navigation.navigate('Login')
+    if (this.state.block === false) {
+      const response = await reviewFetch.addReview(locID, overallRating, priceRating, qualityRating, clenlinessRating, reviewBody)
+      if (response === 201) {
+        this.addPhoto(locID, reviewBody)
+        navigation.navigate('Home')
+      }
+      if (response === 401) {
+        navigation.navigate('Login')
+      }
+      if (response === 404) {
+        navigation.navigate('Logout')
+      }
     }
-    if (response === 404) {
-      navigation.navigate('Logout')
-    }
+  }
+
+  filter (reviewBody) {
+    const profFilter = this.state.profFilter
+    profFilter.forEach(word => {
+      if (reviewBody.includes(word)) {
+        this.setState({ block: true })
+      }
+    })
   }
 
   async addPhoto (locID, reviewBody) {
@@ -283,7 +301,7 @@ class NewReview extends Component {
                 }}
                 placeholderTextColor='#001D4A'
                 onChangeText={(reviewBody) => this.setState({ reviewBody })}
-                value={this.state.review_body}
+                value={this.state.reviewBody}
               />
               <Button
                 round
