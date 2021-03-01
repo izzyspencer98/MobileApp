@@ -20,6 +20,8 @@ I followed the JS standard because Galio was a tricky framework so I didn't want
 
 ## Consistent UI Style
 I tried to be consistent with my design throughout.
+- Final Design:
+![screenshots](https://res.cloudinary.com/dk4rjadwm/image/upload/v1614601583/MobileApp/design_xjr01r.png)
 - Colour scheme:
 ![colour palette](https://res.cloudinary.com/dk4rjadwm/image/upload/v1614361874/MobileApp/Opera_Snapshot_2021-02-26_174646_coolors.co_ucuhmk.png)
 
